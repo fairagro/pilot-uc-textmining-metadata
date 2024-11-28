@@ -22,8 +22,6 @@ The repository is organized as follows:
 
 ## Contributors
 
-We'd like to thank the following contributors for their efforts on this project:
-
 - [Abanoub Abdelmalak](https://github.com/AbanoubAbdelmalak)
   - Email: abdelmalak@zbmed.de
 - [Gabriel Schneider](https://github.com/ga-schneider)
