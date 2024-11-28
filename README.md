@@ -17,6 +17,7 @@ The repository is organized as follows:
     ├──OpenAgrar
     └──Bonares
 ├── documents
+    └──proposal.pdf
 └── README.md
 ```
 
