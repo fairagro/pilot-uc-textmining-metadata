@@ -9,7 +9,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Copy scripts and requirements
-COPY processing.py utils/url_manipulation.py llist_harvester.py fetch_openagrar.py filter_openagrar.py requirements.txt .
+COPY processing.py url_manipulation.py llist_harvester.py fetch_openagrar.py filter_openagrar.py requirements.txt .
 
 # Install dependencies
 RUN pip install -r requirements.txt
