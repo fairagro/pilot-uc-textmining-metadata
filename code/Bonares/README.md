@@ -8,6 +8,6 @@ Make sure you have Docker installed. For installation instructions, visit [Docke
 ### Build the Docker Image
 ```bash
 docker build -t bonares_data .
-docker run --rm -v "$(pwd)/../../data/Bonares/outputs:/output" openagrar_data
+docker run --rm -v "$(pwd)/../../data/Bonares/outputs:/output" bonares_data
 ```
 Feel free to replace the `$(pwd)/../../data/Bonares/outputs` with the directory where you want to save the data
