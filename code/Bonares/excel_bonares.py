@@ -12,7 +12,7 @@ if __name__ == '__main__':
     #create a dataframe to store all the data
     df = pd.DataFrame(columns=["ID", "title", "abstract_text","keywords", "publication_year","institute",
                                "language", "location"])
-
+    counter = 0
     for element in bonares:
         # Initialize variables to None
         abstract_text = None
@@ -30,14 +30,14 @@ if __name__ == '__main__':
             abstract_text = element['gmd:MD_Metadata']['gmd:identificationInfo']['bnr:MD_DataIdentification'][
                 'gmd:abstract']['bnr:TypedCharacterString']['#text']
         except Exception as e:
-            print(f"Error accessing abstract_text: {e}")
+            print(f"Error accessing abstract_text at {counter}: {e}")
 
         try:
             # Access keywords
             key_words = element['gmd:MD_Metadata']["gmd:identificationInfo"]["bnr:MD_DataIdentification"][
                 "gmd:descriptiveKeywords"]
         except Exception as e:
-            print(f"Error accessing key_words: {e}")
+            print(f"Error accessing key_words at {counter}: {e}")
 
         try:
             # Access publication year
@@ -45,41 +45,42 @@ if __name__ == '__main__':
             element['gmd:MD_Metadata']['gmd:identificationInfo']["bnr:MD_DataIdentification"]["gmd:citation"][
                 "gmd:CI_Citation"]["gmd:title"]
         except Exception as e:
-            print(f"Error accessing pub_year: {e}")
+            print(f"Error accessing pub_year at {counter}: {e}")
 
         try:
             # Access language
             language = element["gmd:MD_Metadata"]["gmd:language"]["LanguageCode"]["@codeListValue"]
         except Exception as e:
-            print(f"Error accessing language: {e}")
+            print(f"Error accessing language at {counter}: {e}")
 
         try:
             # Access title
             title = element['gmd:MD_Metadata']['gmd:identificationInfo']["bnr:MD_DataIdentification"]["gmd:citation"][
                 "gmd:CI_Citation"]["gmd:title"]['gco:CharacterString']
         except Exception as e:
-            print(f"Error accessing title: {e}")
+            print(f"Error accessing title at {counter}: {e}")
 
         try:
             # Access location
             location = element['gmd:MD_Metadata']["gmd:identificationInfo"]["bnr:MD_DataIdentification"]['gmd:extent']
         except Exception as e:
-            print(f"Error accessing location: {e}")
+            print(f"Error accessing location at {counter}: {e}")
 
         try:
             # Access id
             id = element['gmd:MD_Metadata']['gmd:fileIdentifier']['gco:CharacterString']['#text']
         except Exception as e:
-            print(f"Error accessing id: {e}")
+            print(f"Error accessing id at {counter}: {e}")
 
         try:
             # Access institute
             institute = element['gmd:MD_Metadata']["gmd:contact"]["gmd:CI_ResponsibleParty"]["gmd:organisationName"][
                 "gco:CharacterString"]["#text"]
         except Exception as e:
-            print(f"Error accessing institute: {e}")
+            print(f"Error accessing institute at {counter}: {e}")
             # Append the extracted data as a new row to the DataFrame
         df.loc[len(df)] = [id, title, abstract_text, key_words, pub_year,institute, language, location]
+        counter = counter + 1
     #save the dataset as a csv
     filename = os.getenv('DATACSVFILE', 'default_value_if_not_set')
     excel_filename = os.getenv('DATAEXCELFILE', 'default_value_if_not_set')

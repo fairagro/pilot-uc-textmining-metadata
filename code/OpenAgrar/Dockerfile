@@ -16,10 +16,11 @@ RUN pip install -r requirements.txt
 RUN mkdir /output
 # Set environment variables
 ENV OPENAGRAR_URL="https://www.openagrar.de/servlets/OAIDataProvider?verb=ListRecords&metadataPrefix=oai_datacite&set=open_access"
+#ENV OPENAGRAR_URL="https://www.openagrar.de/servlets/OAIDataProvider?verb=ListRecords&metadataPrefix=oai_datacite&set=doc-type:ResearchData"
 ENV DATAJSONFILE="/output/output.json"
 ENV DATACSVFILE="/output/output.csv"
 ENV PYTHONUNBUFFERED=1
 
 # Run both scripts in sequence
-CMD python fetch_openagrar.py && python filter_openagrar.py
-#CMD python filter_openagrar.py
+#CMD python fetch_openagrar.py && python filter_openagrar.py
+CMD python filter_openagrar.py

@@ -24,4 +24,4 @@ ENV PYTHONUNBUFFERED=1
 # Run both scripts in sequence
 #CMD python fetch_bonares.py && python excel_bonares.py
 #CMD python excel_bonares.py
-CMD python fetch_bonares.py && python excel_bonares.py
+CMD  python excel_bonares.py

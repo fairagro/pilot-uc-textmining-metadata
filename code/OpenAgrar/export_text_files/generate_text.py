@@ -81,7 +81,7 @@ def csv_to_textfiles(csv_file_directory, text_files_directory):
     openagrar = pd.read_csv(csv_file_directory, sep="|")
     # Ensure the output directory exists
     os.makedirs(text_files_directory, exist_ok=True)
-    soil_crop_list = keywords_from_agrovoc()
+    #soil_crop_list = keywords_from_agrovoc()
     # Iterate over each row in the DataFrame
     for _, row in openagrar.iterrows():
         # Extract the `id`, `title`, and `abstract_text` for the current row
@@ -89,30 +89,24 @@ def csv_to_textfiles(csv_file_directory, text_files_directory):
         title = row['title']
         abstract_text = row['abstract_text'][1:-1]
         subjects = row['subjects']
-        if str(subjects)[0] == '[':
-            # print(subjects)
-            subjects = ast.literal_eval(subjects.lower())
-            for subject in subjects:
-                if str(subject) in str(soil_crop_list) or 'soil' in str(subject) or 'crop' in str(subject):
+        # Create the content for the text file
+        content = f"Title: \n{title}\n\nAbstract:\n{abstract_text}\n\n"
 
-                    # Create the content for the text file
-                    content = f"Title: \n{title}\n\nAbstract:\n{abstract_text}"
+        # Define the file name and full path
+        file_name = f"{file_id}.txt"
+        file_path = os.path.join(text_files_directory, file_name)
 
-                    # Define the file name and full path
-                    file_name = f"{file_id}.txt"
-                    file_path = os.path.join(text_files_directory, file_name)
-
-                    # Write the content to a text file
-                    with open(file_path, "w", encoding="utf-8") as file:
-                        file.write(content)
+        # Write the content to a text file
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(content)
 
     print(f"Text files created successfully in directory: {text_files_directory}")
 
 def main():
     """Main function to handle terminal input and call the file generation function."""
     parser = argparse.ArgumentParser(description="Generate text files from a CSV file.")
-    parser.add_argument("--csv_file", type=str, required=True, help="Path to the input CSV file.")
-    parser.add_argument("--out_dir", type=str, required=True, help="Directory where the text files will be saved.")
+    parser.add_argument("--csv_file", type=str, help="Path to the input CSV file.", default="/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/outputs/final_datasets.csv")
+    parser.add_argument("--out_dir", type=str, help="Directory where the text files will be saved.", default="/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/Annotation_texts/datasets")
 
     args = parser.parse_args()
 
