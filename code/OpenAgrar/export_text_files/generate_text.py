@@ -87,7 +87,12 @@ def csv_to_textfiles(csv_file_directory, text_files_directory):
         # Extract the `id`, `title`, and `abstract_text` for the current row
         file_id = row['ID']
         title = row['title']
-        abstract_text = row['abstract_text'][1:-1]
+        abstract_text = row['abstract_text']
+        if abstract_text == "Not Found":
+            abstract_text = abstract_text
+        else:
+            abstract_text = row['abstract_text'][1:-1]
+
         subjects = row['subjects']
         # Create the content for the text file
         content = f"Title: \n{title}\n\nAbstract:\n{abstract_text}\n\n"
@@ -105,8 +110,8 @@ def csv_to_textfiles(csv_file_directory, text_files_directory):
 def main():
     """Main function to handle terminal input and call the file generation function."""
     parser = argparse.ArgumentParser(description="Generate text files from a CSV file.")
-    parser.add_argument("--csv_file", type=str, help="Path to the input CSV file.", default="/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/outputs/final_datasets.csv")
-    parser.add_argument("--out_dir", type=str, help="Directory where the text files will be saved.", default="/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/Annotation_texts/datasets")
+    parser.add_argument("--csv_file", type=str, help="Path to the input CSV file.", default="/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/outputs/final_articles.csv")
+    parser.add_argument("--out_dir", type=str, help="Directory where the text files will be saved.", default="/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/Annotation_texts/pubs")
 
     args = parser.parse_args()
 

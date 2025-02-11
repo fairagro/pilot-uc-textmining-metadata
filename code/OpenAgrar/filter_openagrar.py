@@ -1,10 +1,11 @@
 import json
 import os
 import pandas as pd
+from tqdm import tqdm
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # import file in the dataset place
-    filename = os.getenv('DATAJSONFILE', 'default_value_if_not_set')
+    filename = os.getenv('DATAJSONFILE', '/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/outputs/output.json')
     # Open the file in write mode and use json.dump to write the list to the file
     with open(filename, "r") as file:
         opnenagrardata = json.load(file)
@@ -14,8 +15,9 @@ if __name__ == '__main__':
     df = pd.DataFrame(columns=["ID", "title", "abstract_text","publisher", "publication_year","institute",
                                "authors_names","subjects","language", "Type"])
 
-    for element in opnenagrardata:
+    for element in tqdm(opnenagrardata):
         try:
+            abstract_text = ""
             try:
                 # Access abstract text
                 description = element['metadata']['resource']['descriptions']['description']
@@ -29,9 +31,9 @@ if __name__ == '__main__':
                         continue
                 else:
                     if description['@descriptionType'] == 'Abstract':
-                        abstract_text = desc["#text"]
+                        abstract_text = description["#text"]
                     else:
-                        continue
+                        abstract_text = "Not Found"
 
                 abstract_text = abstract_text.replace('\n',  ' ')
                 abstract_text = '"'+abstract_text+'"'
@@ -43,13 +45,17 @@ if __name__ == '__main__':
             publisher = element["metadata"]["resource"]["publisher"]
             pub_year = element["metadata"]["resource"]['publicationYear']
             # Access language
-            language = element["metadata"]["resource"]["language"]
+            try:
+                language = element["metadata"]["resource"]["language"]
+            except:
+                language = "Not defined"
             # Access title
             title = element["metadata"]["resource"]["titles"]["title"]
             try:
                 subjects = element["metadata"]["resource"]["subjects"]["subject"]
             except:
                 subject = "Empty"
+
             if isinstance(title, str):
                 title = title
             elif isinstance(title, list):
@@ -78,7 +84,7 @@ if __name__ == '__main__':
             # Append the extracted data as a new row to the DataFrame
         df.loc[len(df)] = [id, title, abstract_text, publisher, pub_year,institute,authors_names, subjects,language,type]
     #save the dataset as a csv
-    filename = os.getenv('DATACSVFILE', 'default_value_if_not_set')
+    filename = os.getenv('DATACSVFILE', '/home/abdelmalak/Documents/FairAgro UC/repo/pilot-uc-textmining-metadata/data/OpenAgrar/outputs/output.csv')
     df.to_csv(filename, encoding="utf-8", index=False, sep='|')
 
 
