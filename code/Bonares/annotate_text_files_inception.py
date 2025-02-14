@@ -12,7 +12,9 @@ def initialize_nlp_with_entity_ruler():
     species_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\species_list.json"
     soilTexture_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\soilTexture_list.json"
     bulkDensity_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\bulkDensity_list.json"
+    organicCarbon_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\organicCarbon_list.json"
 
+    
     nlp = spacy.load(model_name)
     nlp.disable_pipes("ner")
 
@@ -23,6 +25,8 @@ def initialize_nlp_with_entity_ruler():
     species_list = load_concept_list(species_file)
     soilTexture_list = load_concept_list(soilTexture_file)
     bulkDensity_list = load_concept_list(bulkDensity_file)
+    organicCarbon_list = load_concept_list(organicCarbon_file)
+
 
     matcher = Matcher(nlp.vocab)
 
@@ -34,12 +38,12 @@ def initialize_nlp_with_entity_ruler():
     {"POS": "VERB", "OP": "*"},  # Optional verbs (e.g., "is", "reaches")
     {"POS": "DET", "OP": "*"},  # Optional determiners (e.g., "the")
     {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
-    {"LIKE_NUM": True},  # Matches the number (e.g., 100, 50)
+    {"LIKE_NUM": True},  # Matches the number (e.g., 100, 50) - Optional now
     {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
 ]
     
     number_before_depth = [
-    {"LIKE_NUM": True},  # Matches numbers (e.g., 100, 50)
+    {"LIKE_NUM": True},  # Matches numbers (e.g., 100, 50) - Optional now
     {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
     {"POS": "NOUN", "OP": "*"},  # Optional nouns (e.g., "cm", "meters")
     {"POS": "ADP", "OP": "*"},  # Optional prepositions (e.g., "is", "has")
@@ -49,12 +53,69 @@ def initialize_nlp_with_entity_ruler():
     {"LEMMA": "depth"}  # Ensures "depth" is present
 ]
 
+    ph_before_number = [
+        {"LEMMA": "ph"},  # Match "ph" as a separate entity
+        {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation before the number (e.g., "(")
+        {"POS": "ADP", "OP": "*"},  # Optional prepositions (e.g., "of", "in")
+        {"POS": "ADV", "OP": "*"},  # Optional adverbs (e.g., "approximately")
+        {"POS": "VERB", "OP": "*"},  # Optional verbs (e.g., "is", "reaches")
+        {"POS": "DET", "OP": "*"},  # Optional determiners (e.g., "the")
+        {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation (e.g., "-")
+        {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}},  # Match single pH values like "7.0" or "7.4"
+        {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation (e.g., "-")
+        {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}},  # Match the second pH value for ranges (e.g., "7.0" or "7.4")
+        {"IS_PUNCT": True},  # Optional punctuation after the number (e.g., ")")
+    ]
+
+    ph_before_number_1 = [
+    {"LEMMA": "ph"},  # Match "ph" as a separate entity
+    {"POS": "ADP", "OP": "*"},  # Optional prepositions (e.g., "of", "in")
+    {"POS": "ADV", "OP": "*"},  # Optional adverbs (e.g., "approximately")
+    {"POS": "VERB", "OP": "*"},  # Optional verbs (e.g., "is", "reaches")
+    {"POS": "DET", "OP": "*"},  # Optional determiners (e.g., "the")
+    {"LIKE_NUM": True, "TEXT": {"REGEX": r"^\d+(\.\d+)?$"}},  # Match whole numbers and decimals (e.g., "6", "6.0", "7.4")
+]
+
+    number_before_ph = [
+        {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}},  # Match single pH values like "7.0" or "7.4"
+        {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
+        {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}, "OP": "*"},  # Match single pH values like "7.0" or "7.4"
+        {"POS": "NOUN", "OP": "*"},  # Optional nouns (e.g., "cm", "meters")
+        {"POS": "ADP", "OP": "*"},  # Optional prepositions (e.g., "is", "has")
+        {"POS": "VERB", "OP": "*"},  # Optional verbs (e.g., "is", "has been")
+        {"POS": "DET", "OP": "*"},  # Optional determiners (e.g., "the")
+        {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
+        {"LEMMA": "ph"}  # Match "pH" as a separate entity
+    ]
+
     depth_variants = [
         [{"LOWER": "soil"}, {"LOWER": "depth"}],  # Matches "soil depth"
         [{"LOWER": "depth"}]  # Matches "depth"
     ]
 
+    soil_available_nitrogen_pattern = [
+    # Matches phrases like "plant nitrogen (N) availability"
+    [
+        {"LOWER": "plant", "OP": "?"},  # Optional "plant"
+        {"LOWER": "nitrogen"},  # Mandatory "nitrogen"
+        {"TEXT": "(", "OP": "?"},  # Optional opening bracket
+        {"LOWER": "n", "OP": "?"},  # Optional chemical symbol (N)
+        {"TEXT": ")", "OP": "?"},  # Optional closing bracket
+        {"LOWER": "availability"}  # Mandatory "availability"
+    ],
+    # Matches phrases like "available nitrogen" or "nitrogen availability"
+    [
+        {"LOWER": "available", "OP": "?"},  # Optional "available"
+        {"LOWER": "nitrogen"},  # Mandatory "nitrogen"
+        {"LOWER": "availability", "OP": "?"}  # Optional "availability"
+    ]
+]
+
     matcher.add("soilDepth", [number_before_depth, depth_before_number])
+    matcher.add("soilPH", [number_before_ph, ph_before_number_1, ph_before_number])
+    matcher.add("soilAvailableNitrogen", soil_available_nitrogen_pattern)
+
+
 
     ruler = nlp.add_pipe("entity_ruler", before="parser")
     patterns = (
@@ -69,6 +130,10 @@ def initialize_nlp_with_entity_ruler():
         sorted([
             {"label": "soilBulkDensity", "pattern": bulkDensity}
             for bulkDensity in bulkDensity_list
+        ], key=lambda x: -len(x["pattern"])) +
+        sorted([
+            {"label": "soilOrganicCarbon", "pattern": organicCarbon}
+            for organicCarbon in organicCarbon_list
         ], key=lambda x: -len(x["pattern"]))
     )
     ruler.add_patterns(patterns)
@@ -115,7 +180,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
         for ent in doc.ents:
             if ent.label_ == "cropSpecies":
                 cas_named_entity = CropsEntity(begin=ent.start_char, end=ent.end_char, crops="cropSpecies")
-            elif ent.label_ in ["soilTexture", "soilBulkDensity"]:
+            elif ent.label_ in ["soilTexture", "soilBulkDensity", "soilOrganicCarbon"]:
                 cas_named_entity = SoilEntity(begin=ent.start_char, end=ent.end_char, Soil=ent.label_)
             else:
                 continue
@@ -124,28 +189,52 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
         # Add soil depth matches to the CAS
         for match_id, start, end in matches:
             span = doc[start:end]
-            # First, add the "depth" if it wasn't already added by the matcher
             depth_added = False
-            
+            ph_added = False
+            nitrogen_added = False
+            print(span, input_file_path)
             for token in span:
-                if token.lemma_ == "depth" and not depth_added:
-                    # Add "depth" entity if it hasn't been added yet
+                if token.lemma_ in ["depth", "ph", "availability"] and not (
+                    depth_added if token.lemma_ == "depth" else ph_added if token.lemma_ == "ph" else nitrogen_added
+                ):
+                    # Determine the correct annotation
+                    soil_type = (
+                        "soilDepth" if token.lemma_ == "depth" else
+                        "soilPH" if token.lemma_ == "ph" else
+                        "soilAvailableNitrogen"
+                    )
+
+                    # Add the annotation
                     cas_named_entity = SoilEntity(
                         begin=token.idx,
                         end=token.idx + len(token.text),  # Correct end position
-                        Soil="soilDepth"
+                        Soil=soil_type
                     )
                     cas.add(cas_named_entity)
-                    depth_added = True  # Mark that "depth" has been added
-                    
+
+                    # Mark as added to prevent duplicate annotations
+                    if token.lemma_ == "depth":
+                        depth_added = True
+                    elif token.lemma_ == "ph":
+                        ph_added = True
+                    else:
+                        nitrogen_added = True
+
                 elif token.like_num:
-                    # Annotate numbers associated with "depth"
-                    cas_named_entity = SoilEntity(
-                        begin=token.idx,
-                        end=token.idx + len(token.text),  # Correct end position
-                        Soil="soilDepth"
-                    )
-                    cas.add(cas_named_entity)
+                    # Annotate numbers associated with depth, pH, or nitrogen availability
+                    if any(t.lemma_ in ["depth", "ph", "availability"] for t in span):
+                        soil_type = (
+                            "soilDepth" if "depth" in [t.lemma_ for t in span] else
+                            "soilPH" if "ph" in [t.lemma_ for t in span] else
+                            "soilAvailableNitrogen"
+                        )
+
+                        cas_named_entity = SoilEntity(
+                            begin=token.idx,
+                            end=token.idx + len(token.text),  # Correct end position
+                            Soil=soil_type
+                        )
+                        cas.add(cas_named_entity)
 
         cas.to_xmi(output_file_path)
     except Exception as e:
