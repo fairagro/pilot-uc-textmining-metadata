@@ -192,7 +192,6 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
             depth_added = False
             ph_added = False
             nitrogen_added = False
-            print(span, input_file_path)
             for token in span:
                 if token.lemma_ in ["depth", "ph", "availability"] and not (
                     depth_added if token.lemma_ == "depth" else ph_added if token.lemma_ == "ph" else nitrogen_added
@@ -236,7 +235,11 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         )
                         cas.add(cas_named_entity)
 
-        cas.to_xmi(output_file_path)
+        if len(doc.ents) > 0:
+            cas.to_xmi(output_file_path)
+            return True 
+        else:
+            return False 
     except Exception as e:
         print(f"Error processing {input_file_path}: {e}")
 
@@ -247,16 +250,21 @@ def process_directory_inception(input_directory, output_directory, nlp, matcher)
 
     os.makedirs(output_directory, exist_ok=True)
 
+    i = 0
     for filename in os.listdir(input_directory):
         if filename.endswith(".txt"):
             input_file_path = os.path.join(input_directory, filename)
             output_file_path = os.path.join(output_directory, filename.replace(".txt", "_inception.xmi"))
-            annotate_text_inception(input_file_path, output_file_path, nlp, matcher)
+            entity_present = annotate_text_inception(input_file_path, output_file_path, nlp, matcher)
+            if(entity_present):
+                i = i+1
+            if i == 15:
+                break
 
 if __name__ == "__main__":
     nlp, matcher = initialize_nlp_with_entity_ruler()
-    input_directory = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\filtered_df_soil_crop_year_LTE_test"
-    output_directory = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\filtered_df_soil_crop_year_LTE_test_annotated_inception"
+    input_directory = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\filtered_df_soil_crop_year_LTE"
+    output_directory = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\filtered_df_soil_crop_year_LTE_test_annotated_inception_15"
 
     print(f"Processing text files in Inception format from: {input_directory}")
     process_directory_inception(input_directory, output_directory, nlp, matcher)
