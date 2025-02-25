@@ -5,10 +5,16 @@ from spacy.matcher import Matcher
 from spacy import displacy
 from cassis import *
 from cassis.typesystem import TYPE_NAME_FS_ARRAY, TYPE_NAME_ANNOTATION
+from geotext import GeoText
+from collections import Counter
+import re
+
+
 
 
 def initialize_nlp_with_entity_ruler():
     model_name = "en_core_web_sm"
+    
     species_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\species_list.json"
     soilTexture_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\soilTexture_list.json"
     bulkDensity_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\bulkDensity_list.json"
@@ -16,7 +22,7 @@ def initialize_nlp_with_entity_ruler():
 
     
     nlp = spacy.load(model_name)
-    nlp.disable_pipes("ner")
+    # nlp.disable_pipes("ner")
 
     def load_concept_list(filename):
         with open(filename, "r", encoding="utf-8") as f:
@@ -110,10 +116,42 @@ def initialize_nlp_with_entity_ruler():
         {"LOWER": "availability", "OP": "?"}  # Optional "availability"
     ]
 ]
+    latitude_pattern = [
+    {"IS_DIGIT": True, "LENGTH": 2},  # Matches the degrees part (e.g., "51")
+    {"TEXT": "°"},                    # Matches the degree symbol
+    {"IS_DIGIT": True, "LENGTH": 2},  # Matches the minutes part (e.g., "82")
+    {"TEXT": "'"},                    # Matches the minutes symbol
+    {"LOWER": {"IN": ["n", "s"]}}     # Matches the direction (N or S, case-insensitive)
+]
+
+    longitude_pattern = [
+    {"IS_DIGIT": True, "LENGTH": {"IN": [2, 3]}},  # Matches 2 or 3 digits (degrees part)    
+    {"TEXT": "°"},                    # Matches the degree symbol
+    {"IS_DIGIT": True, "LENGTH": 2},  # Matches the minutes part (e.g., "82")
+    {"TEXT": "'"},                    # Matches the minutes symbol
+    {"LOWER": {"IN": ["e", "w"]}, "OP": "?"}     # Matches the direction (N or S, case-insensitive)
+]
+    
+    longitude_pattern_1 = [
+    {"IS_DIGIT": True, "LENGTH": {"IN": [1, 2, 3]}},  # Degrees (1 to 3 digits)
+    {"TEXT": "°"},                                     # Degree symbol
+    {"TEXT": {"REGEX": r"^\d{2}’\d{2}(?:\.\d+)?$"}},  # Minutes, seconds, and optional fractional seconds
+    {"TEXT": "’’"},                                   # Seconds symbol
+    {"LOWER": {"IN": ["e", "w"]}}                     # Direction (E or W, case-insensitive)
+]
+    latitude_pattern_1 = [
+    {"IS_DIGIT": True, "LENGTH": {"IN": [1, 2, 3]}},  # Degrees (1 to 3 digits)
+    {"TEXT": "°"},                                     # Degree symbol
+    {"TEXT": {"REGEX": r"^\d{2}’\d{2}(?:\.\d+)?$"}},  # Minutes, seconds, and optional fractional seconds
+    {"TEXT": "’’"},                                   # Seconds symbol
+    {"LOWER": {"IN": ["n", "s"]}}                     # Direction (E or W, case-insensitive)
+]
 
     matcher.add("soilDepth", [number_before_depth, depth_before_number])
     matcher.add("soilPH", [number_before_ph, ph_before_number_1, ph_before_number])
     matcher.add("soilAvailableNitrogen", soil_available_nitrogen_pattern)
+    matcher.add("latitude", [latitude_pattern, latitude_pattern_1])
+    matcher.add("longitude", [longitude_pattern, longitude_pattern_1])
 
 
 
@@ -147,25 +185,35 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
 
         doc = nlp(text.lower())
         matches = matcher(doc)
+        places = GeoText(text)
 
         SENTENCE_TYPE = "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence"
         TOKEN_TYPE = "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token"
         NER_TYPE_CROPS = "webanno.custom.Crops"
         NER_TYPE_SOIL = "webanno.custom.Soil"
+        NER_TYPE_LOCATION = "webanno.custom.Location"
 
         with open(r"C:\Users\husain\pilot-uc-textmining-metadata\code\Bonares\full-typesystem.xml", "rb") as f:
             ts = load_typesystem(f)
 
-
         cas = Cas(typesystem=ts)
         cas.sofa_string = text
-
-        # print(cas.typesystem.get_types())
 
         Sentence = ts.get_type(SENTENCE_TYPE)
         Token = ts.get_type(TOKEN_TYPE)
         CropsEntity = ts.get_type(NER_TYPE_CROPS)
         SoilEntity = ts.get_type(NER_TYPE_SOIL)
+        LocationEntity = ts.get_type(NER_TYPE_LOCATION)
+
+        # Track annotated spans to prevent overlaps
+        annotated_spans = []
+
+        # Helper function to check for overlaps
+        def is_overlap(new_span, existing_spans):
+            for existing_span in existing_spans:
+                if not (new_span[1] <= existing_span[0] or new_span[0] >= existing_span[1]):
+                    return True  # Overlap detected
+            return False  # No overlap
 
         # Add sentences and tokens to the CAS
         for sent in doc.sents:
@@ -178,68 +226,136 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
 
         # Add entities to the CAS
         for ent in doc.ents:
-            if ent.label_ == "cropSpecies":
-                cas_named_entity = CropsEntity(begin=ent.start_char, end=ent.end_char, crops="cropSpecies")
-            elif ent.label_ in ["soilTexture", "soilBulkDensity", "soilOrganicCarbon"]:
-                cas_named_entity = SoilEntity(begin=ent.start_char, end=ent.end_char, Soil=ent.label_)
-            else:
-                continue
-            cas.add(cas_named_entity)
+            new_span = (ent.start_char, ent.end_char)
+            if not is_overlap(new_span, annotated_spans):
+                if ent.label_ == "cropSpecies":
+                    cas_named_entity = CropsEntity(begin=ent.start_char, end=ent.end_char, crops="cropSpecies")
+                elif ent.label_ in ["soilTexture", "soilBulkDensity", "soilOrganicCarbon"]:
+                    cas_named_entity = SoilEntity(begin=ent.start_char, end=ent.end_char, Soil=ent.label_)
+                else:
+                    continue
+                cas.add(cas_named_entity)
+                annotated_spans.append(new_span)  # Track the annotated span
 
         # Add soil depth matches to the CAS
         for match_id, start, end in matches:
             span = doc[start:end]
-            depth_added = False
-            ph_added = False
-            nitrogen_added = False
-            for token in span:
-                if token.lemma_ in ["depth", "ph", "availability"] and not (
-                    depth_added if token.lemma_ == "depth" else ph_added if token.lemma_ == "ph" else nitrogen_added
-                ):
-                    # Determine the correct annotation
-                    soil_type = (
-                        "soilDepth" if token.lemma_ == "depth" else
-                        "soilPH" if token.lemma_ == "ph" else
-                        "soilAvailableNitrogen"
-                    )
-
-                    # Add the annotation
-                    cas_named_entity = SoilEntity(
-                        begin=token.idx,
-                        end=token.idx + len(token.text),  # Correct end position
-                        Soil=soil_type
-                    )
-                    cas.add(cas_named_entity)
-
-                    # Mark as added to prevent duplicate annotations
-                    if token.lemma_ == "depth":
-                        depth_added = True
-                    elif token.lemma_ == "ph":
-                        ph_added = True
-                    else:
-                        nitrogen_added = True
-
-                elif token.like_num:
-                    # Annotate numbers associated with depth, pH, or nitrogen availability
-                    if any(t.lemma_ in ["depth", "ph", "availability"] for t in span):
+            new_span = (span.start_char, span.end_char)
+            print(span)
+            if not is_overlap(new_span, annotated_spans):
+                depth_added = False
+                ph_added = False
+                nitrogen_added = False
+                latitude_added = False
+                longitude_added = False
+                for token in span:
+                    if token.lemma_ in ["depth", "ph", "availability"] and not (
+                        depth_added if token.lemma_ == "depth" else ph_added if token.lemma_ == "ph" else nitrogen_added
+                    ):
                         soil_type = (
-                            "soilDepth" if "depth" in [t.lemma_ for t in span] else
-                            "soilPH" if "ph" in [t.lemma_ for t in span] else
+                            "soilDepth" if token.lemma_ == "depth" else
+                            "soilPH" if token.lemma_ == "ph" else
                             "soilAvailableNitrogen"
                         )
-
                         cas_named_entity = SoilEntity(
                             begin=token.idx,
-                            end=token.idx + len(token.text),  # Correct end position
+                            end=token.idx + len(token.text),
                             Soil=soil_type
                         )
                         cas.add(cas_named_entity)
+                        annotated_spans.append((token.idx, token.idx + len(token.text)))  # Track the annotated span
+
+                        if token.lemma_ == "depth":
+                            depth_added = True
+                        elif token.lemma_ == "ph":
+                            ph_added = True
+                        else:
+                            nitrogen_added = True
+
+                    elif token.like_num:
+                        if any(t.lemma_ in ["depth", "ph", "availability"] for t in span):
+                            soil_type = (
+                                "soilDepth" if "depth" in [t.lemma_ for t in span] else
+                                "soilPH" if "ph" in [t.lemma_ for t in span] else
+                                "soilAvailableNitrogen"
+                            )
+                            cas_named_entity = SoilEntity(
+                                begin=token.idx,
+                                end=token.idx + len(token.text),
+                                Soil=soil_type
+                            )
+                            cas.add(cas_named_entity)
+                            annotated_spans.append((token.idx, token.idx + len(token.text)))  # Track the annotated span
+
+                # Latitude check
+                full_text = "".join([token.text for token in span]).strip()
+                if (re.match(r"^\d{1,2}°\d{1,2}' ?[NnSs]$", full_text) or re.match(r"^\d{1,3}°\d{2}’\d{2}(?:\.\d+)?’’[NnSs]$", full_text))  and not latitude_added:
+                    cas_named_entity = LocationEntity(
+                        begin=span.start_char,
+                        end=span.end_char,
+                        Location="latitude"
+                    )
+                    cas.add(cas_named_entity)
+                    annotated_spans.append((span.start_char, span.end_char))  # Track the annotated span
+                    latitude_added = True
+
+                # Longitude check
+                elif (re.match(r"^\d{1,3}°\d{1,2}' ?[EeWw]?$", full_text) or re.match(r"^\d{1,3}°\d{2}’\d{2}(?:\.\d+)?’’[EeWw]$", full_text)) and not longitude_added:
+                    cas_named_entity = LocationEntity(
+                        begin=span.start_char,
+                        end=span.end_char,
+                        Location="longitude"
+                    )
+                    cas.add(cas_named_entity)
+                    annotated_spans.append((span.start_char, span.end_char))  # Track the annotated span
+                    longitude_added = True
+
+        # Add city and country annotations
+        cities = places.cities
+        countries = places.countries
+        cities_counts = Counter(cities)
+        countries_counts = Counter(countries)
+
+        for city, count in cities_counts.items():
+            if not city == "Boden":
+                if count > 0:
+                    start_city = 0
+                    for i in range(count):
+                        start_city = text.find(city, start_city + 1)
+                        end_city = start_city + len(city)
+                        new_span = (start_city, end_city)
+                        if not is_overlap(new_span, annotated_spans):
+                            cas_named_entity = LocationEntity(begin=start_city, end=end_city, Location="city")
+                            cas.add(cas_named_entity)
+                            annotated_spans.append(new_span)  # Track the annotated span
+
+        for country, count in countries_counts.items():
+            if count > 0:
+                start_country = 0
+                for i in range(count):
+                    start_country = text.find(country, start_country + 1)
+                    end_country = start_country + len(country)
+                    new_span = (start_country, end_country)
+                    if not is_overlap(new_span, annotated_spans):
+                        cas_named_entity = LocationEntity(begin=start_country, end=end_country, Location="country")
+                        cas.add(cas_named_entity)
+                        annotated_spans.append(new_span)  # Track the annotated span
+
+        # Add region annotations
+        for ent in doc.ents:
+            if ent.label_ == "GPE":
+                if ent.text.capitalize() not in cities and ent.text.capitalize() not in countries and not ent.text.capitalize() == "Düngung":
+                    new_span = (ent.start_char, ent.end_char)
+                    if not is_overlap(new_span, annotated_spans):
+                        cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="region")
+                        cas.add(cas_named_entity)
+                        annotated_spans.append(new_span)  # Track the annotated span
 
         if len(doc.ents) > 0:
             cas.to_xmi(output_file_path)
-            return True 
+            return True
         else:
-            return False 
+            return False
     except Exception as e:
         print(f"Error processing {input_file_path}: {e}")
 
