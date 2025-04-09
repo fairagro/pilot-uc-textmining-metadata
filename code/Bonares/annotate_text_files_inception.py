@@ -52,15 +52,36 @@ def initialize_nlp_with_entity_ruler():
     {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
     {"LIKE_NUM": True},  # Matches the number (e.g., 100, 50) - Optional now
     {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
+    {
+        "LOWER": {
+            "IN": [
+                "cm", "centimeter", "centimeters",
+                "m", "meter", "meters",
+                "in", "inch", "inches",
+                "ft", "feet", "foot"
+            ]
+        },
+        "OP": "*"  # Make unit optional
+    }
 ]
     
     number_before_depth = [
     {"LIKE_NUM": True},  # Matches numbers (e.g., 100, 50) - Optional now
     {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
-    {"POS": "NOUN", "OP": "*"},  # Optional nouns (e.g., "cm", "meters")
-    {"POS": "ADP", "OP": "*"},  # Optional prepositions (e.g., "is", "has")
-    {"POS": "VERB", "OP": "*"},  # Optional verbs (e.g., "is", "has been")
-    {"POS": "DET", "OP": "*"},  # Optional determiners (e.g., "the")
+    {
+        "LOWER": {
+            "IN": [
+                "cm", "centimeter", "centimeters",
+                "m", "meter", "meters",
+                "in", "inch", "inches",
+                "ft", "feet", "foot"
+            ]
+        },
+        "OP": "*"  # Make unit optional
+    },
+    {"POS": "ADP", "OP": "*"},  # e.g., "of", "in"
+    {"POS": "VERB", "OP": "*"},  # e.g., "has", "is"
+    {"POS": "DET", "OP": "*"},  # e.g., "the"
     {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
     {"LEMMA": "depth"}  # Ensures "depth" is present
 ]
