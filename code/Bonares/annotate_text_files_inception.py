@@ -8,10 +8,15 @@ from cassis.typesystem import TYPE_NAME_FS_ARRAY, TYPE_NAME_ANNOTATION
 from geotext import GeoText
 from collections import Counter
 import re
+from gliner import GLiNER
+
+model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1")
 
 
 
-
+def load_concept_list(filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            return json.load(f)
 def initialize_nlp_with_entity_ruler():
     model_name = "en_core_web_sm"
     
@@ -32,7 +37,8 @@ def initialize_nlp_with_entity_ruler():
     soilTexture_list = load_concept_list(soilTexture_file)
     bulkDensity_list = load_concept_list(bulkDensity_file)
     organicCarbon_list = load_concept_list(organicCarbon_file)
-
+    soilReferenceGroup_list = load_concept_list(soilReferenceGroup_file)
+    germanCities_list = load_concept_list(germanCities_file)
 
     matcher = Matcher(nlp.vocab)
 
