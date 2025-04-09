@@ -257,10 +257,12 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
         CropsEntity = ts.get_type(NER_TYPE_CROPS)
         SoilEntity = ts.get_type(NER_TYPE_SOIL)
         LocationEntity = ts.get_type(NER_TYPE_LOCATION)
-
+        TimeEntity = ts.get_type(NER_TYPE_TIME)
         # Track annotated spans to prevent overlaps
         annotated_spans = []
-
+        # Define units for depth and other measurements
+        units = {"cm", "centimeter", "centimeters", "m", "meter", "meters",
+         "in", "inch", "inches", "ft", "feet", "foot"}
         # Helper function to check for overlaps
         def is_overlap(new_span, existing_spans):
             for existing_span in existing_spans:
@@ -278,6 +280,8 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                 cas.add(cas_token)
 
         # Add entities to the CAS
+        
+
         for ent in doc.ents:
             new_span = (ent.start_char, ent.end_char)
             if not is_overlap(new_span, annotated_spans):
@@ -296,7 +300,11 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                 annotated_spans.append(new_span)  # Track the annotated span
 
         # Add soil depth matches to the CAS
+        filtered_matches = {}
         for match_id, start, end in matches:
+            if start not in filtered_matches or end > filtered_matches[start][1]:
+                filtered_matches[start] = (match_id, start, end)
+        for match_id, start, end in filtered_matches.values():
             span = doc[start:end]
             new_span = (span.start_char, span.end_char)
             print(span)
