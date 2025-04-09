@@ -244,6 +244,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
         NER_TYPE_CROPS = "webanno.custom.Crops"
         NER_TYPE_SOIL = "webanno.custom.Soil"
         NER_TYPE_LOCATION = "webanno.custom.Location"
+        NER_TYPE_TIME = "webanno.custom.Timestatement"
 
         with open(r"C:\Users\husain\pilot-uc-textmining-metadata\code\Bonares\full-typesystem.xml", "rb") as f:
             ts = load_typesystem(f)
