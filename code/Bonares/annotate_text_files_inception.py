@@ -190,7 +190,7 @@ def initialize_nlp_with_entity_ruler():
 ]
 
     matcher.add("soilDepth", [number_before_depth, depth_before_number])
-    matcher.add("soilPH", [number_before_ph, ph_before_number_1, ph_before_number])
+    matcher.add("soilPH", [number_before_ph, ph_before_number_1, ph_before_number,ph_comma_list,ph_range])
     matcher.add("soilAvailableNitrogen", soil_available_nitrogen_pattern)
     matcher.add("latitude", [latitude_pattern, latitude_pattern_1])
     matcher.add("longitude", [longitude_pattern, longitude_pattern_1])
@@ -214,6 +214,14 @@ def initialize_nlp_with_entity_ruler():
         sorted([
             {"label": "soilOrganicCarbon", "pattern": organicCarbon}
             for organicCarbon in organicCarbon_list
+        ], key=lambda x: -len(x["pattern"])) +
+        sorted([
+            {"label": "soilReferenceGroup", "pattern": referencegroup}
+            for referencegroup in soilReferenceGroup_list
+        ], key=lambda x: -len(x["pattern"])) +
+        sorted([
+            {"label": "city", "pattern": city}
+            for city in germanCities_list
         ], key=lambda x: -len(x["pattern"]))
     )
     ruler.add_patterns(patterns)
@@ -221,6 +229,8 @@ def initialize_nlp_with_entity_ruler():
     return nlp, matcher
 
 def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
+    germanCities_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/de_cities_list.json"
+    germanCities_list = load_concept_list(germanCities_file)
     try:
         with open(input_file_path, "r", encoding="utf-8") as file:
             text = file.read()
