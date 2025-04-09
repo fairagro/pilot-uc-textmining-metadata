@@ -3407,6 +3407,40 @@ relational adjectives, such as "proud" (with arguments who and of what).
                 
         <typeDescription>
                         
+            <name>webanno.custom.Location</name>
+                        
+            <description/>
+                        
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+                        
+            <features>
+                                
+                <featureDescription>
+                                        
+                    <name>identifier</name>
+                                        
+                    <description/>
+                                        
+                    <rangeTypeName>uima.cas.StringArray</rangeTypeName>
+                                    
+                </featureDescription>
+                                
+                <featureDescription>
+                                        
+                    <name>Location</name>
+                                        
+                    <description/>
+                                        
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                                    
+                </featureDescription>
+                            
+            </features>
+                    
+        </typeDescription>
+                
+        <typeDescription>
+                        
             <name>webanno.custom.Soil</name>
                         
             <description>A specific soil described in the dataset.</description>
@@ -3428,6 +3462,40 @@ relational adjectives, such as "proud" (with arguments who and of what).
                 <featureDescription>
                                         
                     <name>Soil</name>
+                                        
+                    <description/>
+                                        
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                                    
+                </featureDescription>
+                            
+            </features>
+                    
+        </typeDescription>
+                
+        <typeDescription>
+                        
+            <name>webanno.custom.Timestatement</name>
+                        
+            <description/>
+                        
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+                        
+            <features>
+                                
+                <featureDescription>
+                                        
+                    <name>identifier</name>
+                                        
+                    <description/>
+                                        
+                    <rangeTypeName>uima.cas.StringArray</rangeTypeName>
+                                    
+                </featureDescription>
+                                
+                <featureDescription>
+                                        
+                    <name>Timestatement</name>
                                         
                     <description/>
                                         
