@@ -234,7 +234,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
     try:
         with open(input_file_path, "r", encoding="utf-8") as file:
             text = file.read()
-
+        orig_doc = nlp(text)
         doc = nlp(text.lower())
         matches = matcher(doc)
         places = GeoText(text)
@@ -282,8 +282,13 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
             if not is_overlap(new_span, annotated_spans):
                 if ent.label_ == "cropSpecies":
                     cas_named_entity = CropsEntity(begin=ent.start_char, end=ent.end_char, crops="cropSpecies")
-                elif ent.label_ in ["soilTexture", "soilBulkDensity", "soilOrganicCarbon"]:
+                elif ent.label_ in ["soilTexture", "soilBulkDensity", "soilOrganicCarbon", "soilReferenceGroup"]:
                     cas_named_entity = SoilEntity(begin=ent.start_char, end=ent.end_char, Soil=ent.label_)
+                elif ent.label_ == "city":
+                    if orig_doc[ent.start:ent.end].text.istitle():
+                        cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="city")
+                    else:
+                        continue
                 else:
                     continue
                 cas.add(cas_named_entity)
@@ -300,7 +305,8 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                 nitrogen_added = False
                 latitude_added = False
                 longitude_added = False
-                for token in span:
+
+                for i, token in enumerate(span):
                     if token.lemma_ in ["depth", "ph", "availability"] and not (
                         depth_added if token.lemma_ == "depth" else ph_added if token.lemma_ == "ph" else nitrogen_added
                     ):
@@ -325,7 +331,29 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                             nitrogen_added = True
 
                     elif token.like_num:
-                        if any(t.lemma_ in ["depth", "ph", "availability"] for t in span):
+                        if any(t.lemma_ == "depth" for t in span):
+                            soil_type = "soilDepth"
+
+                            # Default to using just the number
+                            begin = token.idx
+                            end = token.idx + len(token.text)
+
+                            # Extend the span if the next token is a unit
+                            if i + 1 < len(span):
+                                next_token = span[i + 1]
+                                if next_token.text.lower() in units:
+                                    end = next_token.idx + len(next_token.text)
+
+                            # Annotate number + optional unit as a single span
+                            if not is_overlap((begin, end), annotated_spans):
+                                cas_named_entity = SoilEntity(
+                                    begin=begin,
+                                    end=end,
+                                    Soil=soil_type
+                                )
+                                cas.add(cas_named_entity)
+                                annotated_spans.append((begin, end))
+                        elif any(t.lemma_ in ["ph", "availability"] for t in span):
                             soil_type = (
                                 "soilDepth" if "depth" in [t.lemma_ for t in span] else
                                 "soilPH" if "ph" in [t.lemma_ for t in span] else
