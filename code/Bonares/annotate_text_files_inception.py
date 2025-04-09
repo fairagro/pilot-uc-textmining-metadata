@@ -108,7 +108,22 @@ def initialize_nlp_with_entity_ruler():
     {"POS": "DET", "OP": "*"},  # Optional determiners (e.g., "the")
     {"LIKE_NUM": True, "TEXT": {"REGEX": r"^\d+(\.\d+)?$"}},  # Match whole numbers and decimals (e.g., "6", "6.0", "7.4")
 ]
-
+    ph_comma_list = [
+    {"LEMMA": "ph"},
+    {"IS_SPACE": True, "OP": "*"},
+    {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}},
+    {"IS_PUNCT": True, "TEXT": ",", "OP": "?"},
+    {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}, "OP": "?"},
+    {"LOWER": "and", "OP": "?"},
+    {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}, "OP": "?"}
+]
+    ph_range = [
+    {"LEMMA": "ph"},
+    {"IS_SPACE": True, "OP": "*"},
+    {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}},  # First number in the range
+    {"LOWER": "to"},  # "to" indicating a range
+    {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}},  # Second number in the range
+]
     number_before_ph = [
         {"LIKE_NUM": True, "TEXT": {"REGEX": r"^(?:[0-9]|1[0-4])(\.\d+)?$"}},  # Match single pH values like "7.0" or "7.4"
         {"IS_PUNCT": True, "OP": "*"},  # Optional punctuation
