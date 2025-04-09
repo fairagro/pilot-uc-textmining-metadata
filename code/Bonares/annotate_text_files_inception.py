@@ -364,7 +364,6 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                                 annotated_spans.append((begin, end))
                         elif any(t.lemma_ in ["ph", "availability"] for t in span):
                             soil_type = (
-                                "soilDepth" if "depth" in [t.lemma_ for t in span] else
                                 "soilPH" if "ph" in [t.lemma_ for t in span] else
                                 "soilAvailableNitrogen"
                             )
@@ -429,16 +428,47 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         cas_named_entity = LocationEntity(begin=start_country, end=end_country, Location="country")
                         cas.add(cas_named_entity)
                         annotated_spans.append(new_span)  # Track the annotated span
+        #Add date_related entities
+        labels = ["startDate","endDate", "duration", "geographicRegion"]
+        location_dic = {"startDate": "startTime", "endDate": "endTime", "duration": "duration"}
+        for large, sent in zip(orig_doc.sents, doc.sents):
+            entities = model.predict_entities(sent.text, labels)
+            for entity in entities:
+                start = entity["start"]+sent.start_char
+                end = entity["end"]+sent.start_char
+                new_span = (start, end)
+                if not is_overlap(new_span, annotated_spans):
+                    if entity["label"] == "geographicRegion":
+                        location_name = entity["text"].lower()
+                        # Check if the string is part of any list element
+                        matches = [item for item in germanCities_list if location_name.lower() in item.lower()]
+                        if matches:
+                            cas_named_entity = LocationEntity(begin=start, end=end, Location="city")
+                        else:
+                            normal_text = large.text[entity["start"]:entity["end"]]
+                            #print(large.text.lower()==sent.text)
+                            #print(sent)
+                            if normal_text.istitle():
+                                print(normal_text)
+                                cas_named_entity = LocationEntity(begin=start, end=end, Location="region")
+                            else:
+                                continue
+                        cas.add(cas_named_entity)
+                        annotated_spans.append(new_span)
+                    else:
+                        cas_named_entity = TimeEntity(begin=start, end=end, Timestatement=location_dic[entity["label"]])
+                        cas.add(cas_named_entity)
+                        annotated_spans.append(new_span)
 
         # Add region annotations
-        for ent in doc.ents:
-            if ent.label_ == "GPE":
-                if ent.text.capitalize() not in cities and ent.text.capitalize() not in countries and not ent.text.capitalize() == "Düngung":
-                    new_span = (ent.start_char, ent.end_char)
-                    if not is_overlap(new_span, annotated_spans):
-                        cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="region")
-                        cas.add(cas_named_entity)
-                        annotated_spans.append(new_span)  # Track the annotated span
+        # for ent in doc.ents:
+        #     if ent.label_ == "GPE":
+        #         if ent.text.capitalize() not in cities and ent.text.capitalize() not in countries and not ent.text.capitalize() == "Düngung":
+        #             new_span = (ent.start_char, ent.end_char)
+        #             if not is_overlap(new_span, annotated_spans):
+        #                 cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="region")
+        #                 cas.add(cas_named_entity)
+        #                 annotated_spans.append(new_span)  # Track the annotated span
 
         if len(doc.ents) > 0:
             cas.to_xmi(output_file_path)
