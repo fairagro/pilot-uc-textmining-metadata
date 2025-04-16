@@ -5,23 +5,23 @@ types = ["PPLA","PPLA2","PPLC", "PPLL","PPL"]
 rejected = ["boden", "see", "panten", "wanna","sand","felden","felde", "eisen"
             ,"bark","below","block","berl","during","point", "bias","over","may","well"
             ,"end","drift", "hand","wetter","grain","grass","bone","theta","along","wind",
-            "rain"]
+            "rain", "einem","einer","eines","einem","einen","eines","einer","einem","besten",
+            "berk","drei","holz","trotz","dies", "achim","raum","feld","lage","heidlamp","dechow"]
 with open("/home/abdelmalak/Documents/DE.txt", "r", encoding="utf-8") as file:
     for line in file:
         parts = line.strip().split("\t")
         if len(parts) > 1:
             name = parts[2]
-            if name.lower() in rejected:
-                continue
-            type = parts[7]
-            if type in types:
-                german_city_names.add(name.lower())
-                german_city_names.add(parts[1].lower())
-                if name.lower() == "of":
-                    print(parts)
-                if " " in name:
-                    hyphenated_name = name.replace(" ", "-")
-                    german_city_names.add(hyphenated_name.lower())
+            if not name.lower() in rejected and not parts[1].lower() in rejected:
+                type = parts[7]
+                if type in types:
+                    german_city_names.add(name.lower())
+                    german_city_names.add(parts[1].lower())
+                    if name.lower() == "berk":
+                        print(parts)
+                    if " " in name:
+                        hyphenated_name = name.replace(" ", "-")
+                        german_city_names.add(hyphenated_name.lower())
 
 # Convert to list if needed
 german_city_names = list(german_city_names)
