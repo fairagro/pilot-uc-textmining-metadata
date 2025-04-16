@@ -63,7 +63,7 @@ WHERE {
 
 
 def save_soilTexture_list(soilTexture, filename=r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\soilTexture_list.json"):
-    predefined_soil_texture = ["Soil texture","Bodentextur", "Clay","Lehm", "Silty clay","Schluffiger Ton", "Sandy clay","Sandiger Ton", "Clay loam","Lehmboden", "Sandy clay loam","Sandiger lehmiger Lehm", "Silty clay loam","Schluffiger Tonlehm", "Loam","Lehm", "Sandy loam","Sandiger Lehm", "Silty loam","Schluffiger Lehm", "Sand","Sand", "Loamy sand","Lehmiger Sand", "Silt","Schlick"]
+    predefined_soil_texture = ["Clay","Lehm", "Silty clay","Schluffiger Ton", "Sandy clay","Sandiger Ton", "Clay loam","Lehmboden", "Sandy clay loam","Sandiger lehmiger Lehm", "Silty clay loam","Schluffiger Tonlehm", "Loam","Lehm", "Sandy loam","Sandiger Lehm", "Silty loam","Schluffiger Lehm", "Sand","Sand", "Loamy sand","Lehmiger Sand", "Silt","Schlick"]
     predefined_soil_texture = [item.lower() for item in predefined_soil_texture]
     soilTexture.extend(predefined_soil_texture)
     print(soilTexture)
