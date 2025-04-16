@@ -508,7 +508,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                     if entity["label"] == "geographicRegion":
                         location_name = entity["text"].lower()
                         # Check if the string is part of any list element
-                        matches = [item for item in germanCities_list if location_name.lower() in item.lower()]
+                        matches = [item for item in germanCities_list if location_name.lower() == item.lower()]
                         if matches:
                             cas_named_entity = LocationEntity(begin=start, end=end, Location="city")
                         else:
@@ -516,7 +516,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                             #print(large.text.lower()==sent.text)
                             #print(sent)
                             if normal_text.istitle():
-                                print(normal_text)
+                                #print(normal_text)
                                 cas_named_entity = LocationEntity(begin=start, end=end, Location="region")
                             else:
                                 continue
