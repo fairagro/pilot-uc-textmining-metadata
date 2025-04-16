@@ -9,7 +9,7 @@ from geotext import GeoText
 from collections import Counter
 import re
 from gliner import GLiNER
-
+from extra_rules import make_soil_patterns, make_soil_referencegroup
 model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1")
 
 
@@ -39,6 +39,7 @@ def initialize_nlp_with_entity_ruler():
     organicCarbon_list = load_concept_list(organicCarbon_file)
     soilReferenceGroup_list = load_concept_list(soilReferenceGroup_file)
     germanCities_list = load_concept_list(germanCities_file)
+    varieties_list = load_concept_list(varieties_file)
 
     matcher = Matcher(nlp.vocab)
 
@@ -188,12 +189,36 @@ def initialize_nlp_with_entity_ruler():
     {"TEXT": "’’"},                                   # Seconds symbol
     {"LOWER": {"IN": ["n", "s"]}}                     # Direction (E or W, case-insensitive)
 ]
+    start_end_date = [
+    {"SHAPE": "dddd"},  # 4-digit year (start year)
+    {"TEXT": "-"},      # Hyphen
+    {"SHAPE": "dddd"}   # 4-digit year (end year)
+    ]   
+    start_end_date_to = [
+    {"SHAPE": "dddd"},  # 4-digit year (start year)
+    {"TEXT": "to"},      # Hyphen
+    {"SHAPE": "dddd"}   # 4-digit year (end year)
+    ]
+    # Define the list of trigger words for start date
+    start_triggers = ["started", "since", "began", "initiated", "commenced", "launched", 
+                      "from", "set up", "established", "started", "inaugurated", "opened", 
+                      "created", "formed", "constituted", "triggered"]
+    months_seasons = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december",  # months
+        "spring", "summer", "fall", "autumn", "winter"]
+    start_date = [
+    {"LOWER": {"IN": start_triggers}},  # trigger word
+    {"LOWER": {"IN": ["in", "at", "on", "from"]}, "OP": "?"},  # optional preposition
+    {"LOWER": {"IN": months_seasons}},  # Month/season (first part)
+    {"SHAPE": "dddd"},  # 4-digit year (first part)
+]
 
     matcher.add("soilDepth", [number_before_depth, depth_before_number])
     matcher.add("soilPH", [number_before_ph, ph_before_number_1, ph_before_number,ph_comma_list,ph_range])
     matcher.add("soilAvailableNitrogen", soil_available_nitrogen_pattern)
     matcher.add("latitude", [latitude_pattern, latitude_pattern_1])
     matcher.add("longitude", [longitude_pattern, longitude_pattern_1])
+    matcher.add("startEndDate", [start_end_date,start_end_date_to])
+    matcher.add("startDate", [start_date])
 
 
 
@@ -203,10 +228,7 @@ def initialize_nlp_with_entity_ruler():
             {"label": "cropSpecies", "pattern": species}
             for species in species_list
         ], key=lambda x: -len(x["pattern"])) +
-        sorted([
-            {"label": "soilTexture", "pattern": soilTexture}
-            for soilTexture in soilTexture_list
-        ], key=lambda x: -len(x["pattern"])) +
+            make_soil_patterns(soilTexture_list) +
         sorted([
             {"label": "soilBulkDensity", "pattern": bulkDensity}
             for bulkDensity in bulkDensity_list
@@ -215,13 +237,14 @@ def initialize_nlp_with_entity_ruler():
             {"label": "soilOrganicCarbon", "pattern": organicCarbon}
             for organicCarbon in organicCarbon_list
         ], key=lambda x: -len(x["pattern"])) +
-        sorted([
-            {"label": "soilReferenceGroup", "pattern": referencegroup}
-            for referencegroup in soilReferenceGroup_list
-        ], key=lambda x: -len(x["pattern"])) +
+        make_soil_referencegroup(soilReferenceGroup_list) +
         sorted([
             {"label": "city", "pattern": city}
             for city in germanCities_list
+        ], key=lambda x: -len(x["pattern"]))+
+        sorted([
+            {"label": "cropVariety", "pattern": variety}
+            for variety in varieties_list
         ], key=lambda x: -len(x["pattern"]))
     )
     ruler.add_patterns(patterns)
@@ -287,6 +310,8 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
             if not is_overlap(new_span, annotated_spans):
                 if ent.label_ == "cropSpecies":
                     cas_named_entity = CropsEntity(begin=ent.start_char, end=ent.end_char, crops="cropSpecies")
+                elif ent.label_ == "cropVariety":
+                    cas_named_entity = CropsEntity(begin=ent.start_char, end=ent.end_char, crops="cropVariety")
                 elif ent.label_ in ["soilTexture", "soilBulkDensity", "soilOrganicCarbon", "soilReferenceGroup"]:
                     cas_named_entity = SoilEntity(begin=ent.start_char, end=ent.end_char, Soil=ent.label_)
                 elif ent.label_ == "city":
