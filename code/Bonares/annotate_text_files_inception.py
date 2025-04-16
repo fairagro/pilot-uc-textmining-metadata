@@ -332,7 +332,6 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
         for match_id, start, end in filtered_matches.values():
             span = doc[start:end]
             new_span = (span.start_char, span.end_char)
-            print(span)
             if not is_overlap(new_span, annotated_spans):
                 depth_added = False
                 ph_added = False
@@ -364,6 +363,49 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         else:
                             nitrogen_added = True
 
+                    elif token.shape_ == "dddd":
+                        seasons_months = ["january", "february", "march", "april", "may", "june", 
+                                          "july", "august", "september", "october", "november", 
+                                          "december", "spring", "summer", "fall", "winter"]
+                        if nlp.vocab.strings[match_id] == "startDate":
+                            try:
+                                if span[i-1].text in seasons_months:
+                                    print()
+                                    cas_named_entity = TimeEntity(
+                                        begin = span[i-1].idx,
+                                        end = span[i-1].idx + len(span[i-1].text)+ len(token.text)+1,
+                                        Timestatement="startTime"
+                                    )
+                                    cas.add(cas_named_entity)
+                                    annotated_spans.append((span[i-1].idx, span[i-1].idx + len(span[i-1].text)+ len(token.text)+1))
+                            except:
+                                cas_named_entity = TimeEntity(
+                                    begin=token.idx,
+                                    end=token.idx + len(token.text),
+                                    Timestatement="startTime"
+                                )
+                                #print(f'data details: {token.text}, {token.idx}, {token.idx + len(token.text)}')
+                                cas.add(cas_named_entity)
+                                annotated_spans.append((token.idx, token.idx + len(token.text)))
+                        elif nlp.vocab.strings[match_id] == "startEndDate":
+                            start_year = span[0].text
+                            end_year = span[2].text
+                            if token.text == start_year:
+                                cas_named_entity = TimeEntity(
+                                    begin=token.idx,
+                                    end=token.idx + len(token.text),
+                                    Timestatement="startTime"
+                                )
+                            elif token.text == end_year:
+                                cas_named_entity = TimeEntity(
+                                begin=token.idx,
+                                end=token.idx + len(token.text),
+                                Timestatement="endTime"
+                            )
+                            else:
+                                continue
+                            cas.add(cas_named_entity)
+                            annotated_spans.append((token.idx, token.idx + len(token.text)))
                     elif token.like_num:
                         if any(t.lemma_ == "depth" for t in span):
                             soil_type = "soilDepth"
@@ -454,7 +496,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         cas.add(cas_named_entity)
                         annotated_spans.append(new_span)  # Track the annotated span
         #Add date_related entities
-        labels = ["startDate","endDate", "duration", "geographicRegion"]
+        labels = ["startDate","endDate", "date","duration", "geographicRegion"]
         location_dic = {"startDate": "startTime", "endDate": "endTime", "duration": "duration"}
         for large, sent in zip(orig_doc.sents, doc.sents):
             entities = model.predict_entities(sent.text, labels)
@@ -481,10 +523,63 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         cas.add(cas_named_entity)
                         annotated_spans.append(new_span)
                     else:
-                        cas_named_entity = TimeEntity(begin=start, end=end, Timestatement=location_dic[entity["label"]])
-                        cas.add(cas_named_entity)
-                        annotated_spans.append(new_span)
+                        if entity["label"] == "startDate" or entity["label"] == "endDate":
+                            if entity["score"] > 0.8:
+                                cas_named_entity = TimeEntity(begin=start, end=end, Timestatement=location_dic[entity["label"]])
+                                cas.add(cas_named_entity)
+                                annotated_spans.append(new_span)
+                            else:
+                                cas_named_entity = TimeEntity(begin=start, end=end)
+                                cas.add(cas_named_entity)
+                                annotated_spans.append(new_span)
+                        elif entity["label"] == "date":
+                            cas_named_entity = TimeEntity(begin=start, end=end)
+                            cas.add(cas_named_entity)
+                            annotated_spans.append(new_span)
+                        else:
+                            cas_named_entity = TimeEntity(begin=start, end=end, Timestatement=location_dic[entity["label"]])
+                            cas.add(cas_named_entity)
+                            annotated_spans.append(new_span)
+        
+        matcher = Matcher(nlp.vocab)
+        seasons_months = ["january", "february", "march", "april", "may", "june", 
+                                          "july", "august", "september", "october", "november", 
+                                          "december", "spring", "summer", "fall", "winter"]
+        # Basic year (4-digit number)
+        matcher.add("YEAR", [[{"SHAPE": "dddd"}]])
 
+        # Month + Year (e.g. March 2021)
+        matcher.add("MONTH_YEAR", [
+            [{"LOWER": {"IN": [m.lower() for m in seasons_months]}}, {"SHAPE": "dddd"}]
+        ])
+
+        # Full date format (e.g. 10 April 2023)
+        matcher.add("FULL_DATE", [[
+            {"LIKE_NUM": True}, {"LOWER": {"IN": [m.lower() for m in seasons_months]}}, {"SHAPE": "dddd"}
+        ]])
+        doc = nlp(text.lower())
+        matches = matcher(doc)
+
+        filtered_matches = {}
+        for match_id, start, end in matches:
+            if start not in filtered_matches or end > filtered_matches[start][1]:
+                filtered_matches[start] = (match_id, start, end)
+        for match_id, start, end in matches:
+            span = doc[start:end]
+            new_span = (span.start_char, span.end_char)
+
+            if not is_overlap(new_span, annotated_spans):
+                label = nlp.vocab.strings[match_id]
+                if label == "YEAR":
+                    if len(span) > 4 or int(span.text) > 2060:
+                        continue
+                print(f"Matched {label}: {span.text}")
+                cas_named_entity = TimeEntity(
+                    begin=span.start_char,
+                    end=span.end_char
+                )
+                cas.add(cas_named_entity)
+                annotated_spans.append(new_span)
         # Add region annotations
         # for ent in doc.ents:
         #     if ent.label_ == "GPE":
