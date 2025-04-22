@@ -124,15 +124,15 @@ def process_csv(csv_path, model, tokenizer, output_csv_path="ner_results.csv"):
 # Step 5: Main Execution
 if __name__ == "__main__":
     # Path to the input CSV file 
-    input_csv_path = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/output/test_data.csv"  
+    input_csv_path = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/output/test_data.csv"  # Replace with your CSV file path
     
-    local_model_path = "/lustre/scratch/data/s27mhusa_hpc-ner_model_data/Llama-3.1-8B"  
+    local_model_path = "/lustre/scratch/data/s27mhusa_hpc-ner_model_data/Llama-3.3-70B-Instruct"  # Replace with your actual path
 
     # Load the model
     llama_model, llama_tokenizer = load_llama_model(local_model_path)
     
     # Perform NER and save results
-    output_csv_path = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/output/Llama-3.1-8B_test.csv"
+    output_csv_path = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/output/test-results-3.3-70B_test.csv"
     processed_df = process_csv(input_csv_path, llama_model, llama_tokenizer, output_csv_path)
     
     print("NER processing complete. Sample results:")
