@@ -20,18 +20,15 @@ def load_concept_list(filename):
 def initialize_nlp_with_entity_ruler():
     model_name = "en_core_web_sm"
     
-    species_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\species_list.json"
-    soilTexture_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\soilTexture_list.json"
-    bulkDensity_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\bulkDensity_list.json"
-    organicCarbon_file = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\ConceptsList\organicCarbon_list.json"
-
-    
+    species_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/species_list_modified.json"
+    soilTexture_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/soilTexture_list.json"
+    bulkDensity_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/bulkDensity_list.json"
+    organicCarbon_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/organicCarbon_list.json"
+    soilReferenceGroup_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/soilReferenceGroup.json"
+    germanCities_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/de_cities_list.json"
+    varieties_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/varieties_list.json"
     nlp = spacy.load(model_name)
     # nlp.disable_pipes("ner")
-
-    def load_concept_list(filename):
-        with open(filename, "r", encoding="utf-8") as f:
-            return json.load(f)
 
     species_list = load_concept_list(species_file)
     soilTexture_list = load_concept_list(soilTexture_file)
@@ -269,7 +266,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
         NER_TYPE_LOCATION = "webanno.custom.Location"
         NER_TYPE_TIME = "webanno.custom.Timestatement"
 
-        with open(r"C:\Users\husain\pilot-uc-textmining-metadata\code\Bonares\full-typesystem.xml", "rb") as f:
+        with open(r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/Bonares/full-typesystem.xml", "rb") as f:
             ts = load_typesystem(f)
 
         cas = Cas(typesystem=ts)
@@ -316,7 +313,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                     cas_named_entity = SoilEntity(begin=ent.start_char, end=ent.end_char, Soil=ent.label_)
                 elif ent.label_ == "city":
                     if orig_doc[ent.start:ent.end].text.istitle():
-                        cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="city")
+                        cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="locationName")
                     else:
                         continue
                 else:
@@ -480,7 +477,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         end_city = start_city + len(city)
                         new_span = (start_city, end_city)
                         if not is_overlap(new_span, annotated_spans):
-                            cas_named_entity = LocationEntity(begin=start_city, end=end_city, Location="city")
+                            cas_named_entity = LocationEntity(begin=start_city, end=end_city, Location="locationName")
                             cas.add(cas_named_entity)
                             annotated_spans.append(new_span)  # Track the annotated span
 
@@ -492,7 +489,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                     end_country = start_country + len(country)
                     new_span = (start_country, end_country)
                     if not is_overlap(new_span, annotated_spans):
-                        cas_named_entity = LocationEntity(begin=start_country, end=end_country, Location="country")
+                        cas_named_entity = LocationEntity(begin=start_country, end=end_country, Location="locationName")
                         cas.add(cas_named_entity)
                         annotated_spans.append(new_span)  # Track the annotated span
         #Add date_related entities
@@ -510,14 +507,14 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         # Check if the string is part of any list element
                         matches = [item for item in germanCities_list if location_name.lower() == item.lower()]
                         if matches:
-                            cas_named_entity = LocationEntity(begin=start, end=end, Location="city")
+                            cas_named_entity = LocationEntity(begin=start, end=end, Location="locationName")
                         else:
                             normal_text = large.text[entity["start"]:entity["end"]]
                             #print(large.text.lower()==sent.text)
                             #print(sent)
                             if normal_text.istitle():
                                 #print(normal_text)
-                                cas_named_entity = LocationEntity(begin=start, end=end, Location="region")
+                                cas_named_entity = LocationEntity(begin=start, end=end, Location="locationName")
                             else:
                                 continue
                         cas.add(cas_named_entity)
@@ -586,7 +583,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
         #         if ent.text.capitalize() not in cities and ent.text.capitalize() not in countries and not ent.text.capitalize() == "Düngung":
         #             new_span = (ent.start_char, ent.end_char)
         #             if not is_overlap(new_span, annotated_spans):
-        #                 cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="region")
+        #                 cas_named_entity = LocationEntity(begin=ent.start_char, end=ent.end_char, Location="locationName")
         #                 cas.add(cas_named_entity)
         #                 annotated_spans.append(new_span)  # Track the annotated span
 
@@ -604,22 +601,43 @@ def process_directory_inception(input_directory, output_directory, nlp, matcher)
     output_directory = os.path.normpath(output_directory)
 
     os.makedirs(output_directory, exist_ok=True)
+    filenames = [
+    "98507.txt",
+    "97378.txt",
+    "95868.txt",
+    "92844.txt",
+    "92044.txt",
+    "87621.txt",
+    "73465.txt", # maybe reject
+    "41699.txt",
+    "49873.txt",
+    "62744.txt",
+    "b963432a-9114-4cc0-8387-536c333bc123.txt",
+    "9b72a046-d3e8-4cf9-b318-3cb7a247e0f2.txt",
+    "9b296f99-f6a0-423c-9716-6a04fd2e502f.txt",
+    "97dda154-93d3-4685-beff-9124e7346d68.txt",
+    "8170ee67-01c9-42b6-82ae-1b6442e5bdc3.txt",
+    "2d43d8f7-e485-4df8-aea1-f68347efeab.txt",
+    "03b52930-0210-4bfc-a4ac-75f7544ce7a5.txt",
+    "158fb92b-70b4-4dbf-9176-2ce4de69afc6.txt",
+    "5e0ffb95-6283-45f4-b1da-806d44d916bf.txt",
+    "2eed3d66-84cd-4dd0-bce5-e4fa1560af7a.txt"
+]
 
-    i = 0
     for filename in os.listdir(input_directory):
+
         if filename.endswith(".txt"):
+            if filename not in filenames:
+                continue
+            print(f"Processing file: {filename}")
             input_file_path = os.path.join(input_directory, filename)
             output_file_path = os.path.join(output_directory, filename.replace(".txt", "_inception.xmi"))
             entity_present = annotate_text_inception(input_file_path, output_file_path, nlp, matcher)
-            if(entity_present):
-                i = i+1
-            if i == 15:
-                break
 
 if __name__ == "__main__":
     nlp, matcher = initialize_nlp_with_entity_ruler()
-    input_directory = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\filtered_df_soil_crop_year_LTE"
-    output_directory = r"C:\Users\husain\pilot-uc-textmining-metadata\data\Bonares\output\filtered_df_soil_crop_year_LTE_test_annotated_inception_15"
+    input_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/Bonares/Bonares_filtered"
+    output_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/Bonares/filtered_preannotated_iaa"
 
     print(f"Processing text files in Inception format from: {input_directory}")
     process_directory_inception(input_directory, output_directory, nlp, matcher)
