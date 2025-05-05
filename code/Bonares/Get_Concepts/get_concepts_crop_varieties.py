@@ -36,8 +36,9 @@ while i < len(data):
         # Add the "before var." part to the original list (if not already)
         data.append(before_var)
         # Add the "after var." part to the new list
-        after_var_list.append(after_var)
-        after_var_list.append("var. " + after_var)  # Add "var. " prefix to the variety name
+        after_var_list.append(entry)  # Add the original entry to the new list
+        after_var_list.append(after_var) # Add the variety name to the new list
+        #after_var_list.append("var. " + after_var)  # Add "var. " prefix to the variety name
         
         # Remove the entry from the original list
         data.pop(i)  # Pop removes the item at the current index
