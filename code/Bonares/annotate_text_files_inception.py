@@ -367,7 +367,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                         if nlp.vocab.strings[match_id] == "startDate":
                             try:
                                 if span[i-1].text in seasons_months:
-                                    print()
+                                    #print()
                                     cas_named_entity = TimeEntity(
                                         begin = span[i-1].idx,
                                         end = span[i-1].idx + len(span[i-1].text)+ len(token.text)+1,
@@ -570,7 +570,7 @@ def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
                 if label == "YEAR":
                     if len(span) > 4 or int(span.text) > 2060:
                         continue
-                print(f"Matched {label}: {span.text}")
+                #print(f"Matched {label}: {span.text}")
                 cas_named_entity = TimeEntity(
                     begin=span.start_char,
                     end=span.end_char
@@ -627,8 +627,8 @@ def process_directory_inception(input_directory, output_directory, nlp, matcher)
     for filename in os.listdir(input_directory):
 
         if filename.endswith(".txt"):
-            if filename not in filenames:
-                continue
+            # if filename not in filenames:
+            #     continue
             print(f"Processing file: {filename}")
             input_file_path = os.path.join(input_directory, filename)
             output_file_path = os.path.join(output_directory, filename.replace(".txt", "_inception.xmi"))
