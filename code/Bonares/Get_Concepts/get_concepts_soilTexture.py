@@ -74,4 +74,4 @@ def save_soilTexture_list(soilTexture, filename=r"C:\Users\husain\pilot-uc-textm
 # After getting the species list
 if __name__ == "__main__":
     soilTexture = keywords_from_agrovoc()
-    save_soilTexture_list(soilTexture)
+    save_soilTexture_list(soilTexture, "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/soilTexture_list.json")

@@ -636,8 +636,8 @@ def process_directory_inception(input_directory, output_directory, nlp, matcher)
 
 if __name__ == "__main__":
     nlp, matcher = initialize_nlp_with_entity_ruler()
-    input_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/Bonares/Bonares_filtered"
-    output_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/Bonares/filtered_preannotated_iaa"
+    input_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/OpenAgrar/datasets"
+    output_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/OpenAgrar/datasets_annotations"
 
     print(f"Processing text files in Inception format from: {input_directory}")
     process_directory_inception(input_directory, output_directory, nlp, matcher)
