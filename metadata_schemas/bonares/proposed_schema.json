@@ -1,13 +1,13 @@
 [
     {
-        "doi":"", 
+        "doi":"https://doi.org/10.20387/bonares-hx92-fh95", 
         "duration": ["",""],
-        "startTime": ["",""],
-        "endTime": ["",""],
+        "startTime": ["1981","1980","1989","1992"],
+        "endTime": ["2009","1991","2009"],
         "cropVariety": ["",""],
         "cropSpecies": ["",""],
-        "country": ["",""],
-        "city": ["",""],
+        "country": ["Germany",""],
+        "city": ["Darmstadt","Berlin"],
         "region": ["",""],
         "longitude": ["",""],
         "latitude": ["",""],
@@ -17,7 +17,7 @@
         "soilPH": ["",""],
         "soilBulkDensity": ["",""],
         "soilTexture": ["",""],
-        "soilReferenceGroup": ["",""]
+        "soilReferenceGroup": ["sandy Cambisol",""]
     },
         {
         "doi":"",
