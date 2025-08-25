@@ -1,0 +1,20 @@
+# Creating mappings to other schemas and semantic resources
+- To see overlap to already existing standards (such as metadata schemas) we will explore  on how to create reusable mappings. Having mappings available might help in adoption of the extension by laying a foundation for automated transformation processes
+- We will use [SSSOM](https://github.com/mapping-commons/sssom) as a starting point
+	- You can find a [basic SSSOM tutorial](https://mapping-commons.github.io/sssom/tutorial/) here
+- Mappings can either:
+	- map Types of our extension to terminology classes, representing the same concept (e.g. a 'Soil' class)
+	- map Properties of our Types to terminology classes or properties (e.g. 'cropSpecies' to a terminology property expressing a plant species)
+- How to create a mapping:
+	- We will work in this [Google sheet](https://docs.google.com/spreadsheets/d/1rEoaU0MFYVN-AqDPYS_zqQLNKr8yCawk24SJv1a3h4E/edit?usp=sharing)
+	- Choose the Type/Property you want to map and provide it as a "subject_id" and its name as a "subject_label" 
+		- For Properties please use "Type.propertyName" as an ID, as we don't have any persistent, unique IDs yet
+	- Provide the ID (e.g. the full URL path) of the semantic resource (terminology class/property) as the "object_id" and its name as "object_label"
+		- We will replace the full ID with namespaces at a later stage
+	- Express the type of the semantic relation in the "predicate_id"
+		- You can find a [list of available semantic relation predicates](https://mapping-commons.github.io/sssom/spec-model/#allowed-and-common-mapping-predicates) here
+			- In our case "skos:relatedMatch", "skos:closeMatch", "skos:exactMatch", "skos:narrowMatch" and "skos:broadMatch" will probably be the most common predicates
+	- In our case the mapping justification will be "semapv:ManualMappingCuration"
+	- Put the current date in "mapping_date" and your name in "author_id" (or input your [ORCID](https://orcid.org/), if you have one)
+	- As terminologies are updated over time and concepts and their definitions could change, it is important to provide the specific version number of the object that you map to. Please provide this version number as "object_source_version"
+	- Provide a "confidence" score in your mapping, ranging between 0 and 1 (1 meaning total confidence). This is highly subjective but can be helpful in evaluating a mapping

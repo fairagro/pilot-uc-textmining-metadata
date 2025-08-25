@@ -12,7 +12,7 @@ if __name__ == '__main__':
     print(f'Narrow down to articles from JKI and TI and separate the english and german language articles')
     #create a dataframe to store all the data
     df = pd.DataFrame(columns=["ID", "title", "abstract_text","publisher", "publication_year","institute",
-                               "authors_names","language"])
+                               "authors_names","subjects","language"])
 
     for element in opnenagrardata:
         try:
@@ -43,6 +43,7 @@ if __name__ == '__main__':
             language = element["metadata"]["resource"]["language"]
             # Access title
             title = element["metadata"]["resource"]["titles"]["title"]
+            subjects = element["metadata"]["resource"]["subjects"]["subject"]
             if isinstance(title, str):
                 title = title
             else:
@@ -58,7 +59,7 @@ if __name__ == '__main__':
         except:
             continue
             # Append the extracted data as a new row to the DataFrame
-        df.loc[len(df)] = [id, title, abstract_text, publisher, pub_year,institute,authors_names, language]
+        df.loc[len(df)] = [id, title, abstract_text, publisher, pub_year,institute,authors_names, subjects,language]
     #save the dataset as a csv
     filename = os.getenv('DATACSVFILE', 'default_value_if_not_set')
     df.to_csv(filename, encoding="utf-8", index=False, sep='|')
