@@ -51,6 +51,53 @@ def cas_sentence_to_bio(cas, sentence, annotation_types= [
 
     return tokens, labels
 
+
+def cas_files_to_bio(cas, annotation_types= [
+        "webanno.custom.Crops",
+        "webanno.custom.Location",
+        "webanno.custom.Soil",
+        "webanno.custom.Timestatement",
+    ]):
+    """
+    This function takes the cas fileand the annotation classes. It converts the file into a list of tokens 
+    and matches them with thier BIO format labels
+    Parameters:
+        cas : A cas object that represents the document 
+        annotation_types: The annotation classes according to their definitions in the cas typesystem file
+    Returns:
+        tokens: Sentence tokenized into a list words
+        labels: Correspoinding BIO labels as a list of strings
+    """
+    text = cas.sofa_string
+    doc = nlp(text)
+    tokens = [token.text for token in doc]
+    labels = ["O"] * len(tokens)
+    sen_begin = 0
+    sen_end = len(text)-1
+    for type_name in annotation_types:
+        for ann in cas.select(type_name):
+            begin = ann.begin
+            end = ann.end
+            if begin <= sen_end and begin >= sen_begin and end >= sen_begin and end <= sen_end:
+                # Get label name based on available features
+                label = None
+                for feat in ann.type.all_features:
+                    if feat.name != "sofa" and feat.name != "begin" and feat.name != "end" and hasattr(ann, feat.name):
+                        val = getattr(ann, feat.name)
+                        if val:
+                            label = val
+                            break
+
+                if not label:
+                    label = type_name.split(".")[-1]  # fallback to type name
+
+                for i, token in enumerate(doc):
+                    if token.idx >= begin and (token.idx + len(token)) <= end:
+                        labels[i] = f"B-{label}" if token.idx == begin else f"I-{label}"
+
+    return tokens, labels
+
+
 def cas_to_bio(cas, annotation_types):
     """
     This function takes the cas file and the annotation classes. It converts the cas file into a list of tokens 

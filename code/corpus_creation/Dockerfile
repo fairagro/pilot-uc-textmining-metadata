@@ -15,7 +15,7 @@ RUN mkdir /data
 # Copy the location related lists
 COPY data_lists/countries_list.json data_lists/de_cities_list.json data_lists/de_regions_list.json /data/
 # Copy scripts and requirements
-COPY cas_folders_processing.py cas_to_csv_sentence.py cas_to_tokens.py create_data_from_inception.py viz_funcs.py .
+COPY cas_folders_processing.py cas_to_csv_files.py cas_to_csv_sentence.py cas_to_tokens.py create_data_from_inception.py viz_funcs.py .
 
 
 
