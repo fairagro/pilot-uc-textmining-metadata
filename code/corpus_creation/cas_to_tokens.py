@@ -46,8 +46,11 @@ def cas_sentence_to_bio(cas, sentence, annotation_types= [
                     label = type_name.split(".")[-1]  # fallback to type name
 
                 for i, token in enumerate(doc):
-                    if token.idx >= begin and (token.idx + len(token)) <= end:
-                        labels[i] = f"B-{label}" if token.idx == begin else f"I-{label}"
+                    token_start = token.idx + sen_begin
+                    token_end = token_start + len(token)
+
+                    if token_start >= begin and token_end <= end:
+                        labels[i] = f"B-{label}" if token_start == begin else f"I-{label}"
 
     return tokens, labels
 

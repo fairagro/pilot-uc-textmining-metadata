@@ -13,6 +13,13 @@ from cas_to_tokens import cas_files_to_bio, convert_location_labels
 from cas_folders_processing import process_inception_folder, process_parent_folder_curation
 nlp = spacy.load("en_core_web_sm")
 
+label_list = ["O","B-soilReferenceGroup","I-soilReferenceGroup", "B-soilOrganicCarbon", "I-soilOrganicCarbon", "B-soilTexture", "I-soilTexture",
+               "B-startTime", "I-startTime", "B-endTime", "I-endTime", "B-city", "I-city", "B-duration", "I-duration", "B-cropSpecies", "I-cropSpecies",
+                 "B-soilAvailableNitrogen", "I-soilAvailableNitrogen", "B-soilDepth", "I-soilDepth", "B-region", "I-region", "B-country", "I-country",
+                   "B-longitude", "I-longitude", "B-latitude", "I-latitude", "B-cropVariety", "I-cropVariety", "B-soilPH", "I-soilPH",
+                     "B-soilBulkDensity", "I-soilBulkDensity"]
+label_to_index = {label: idx for idx, label in enumerate(label_list)}
+
 def safe_detect(text):
     try:
         if not text or text.strip() == "":
@@ -31,6 +38,7 @@ def generate_csv_from_cas_files(df, cas_path, target_zip, city_list_path, region
                 "sentence_id": pd.StringDtype(),
                 "file_name": pd.StringDtype(),
                 "Tokens": object,                  # list of strings
+                "ner_tags": object                  #list of integers
                 "Labels": object,                  # list of strings
                 "number_of_tokens": int,
                 "Language": pd.StringDtype(),
@@ -70,10 +78,17 @@ def generate_csv_from_cas_files(df, cas_path, target_zip, city_list_path, region
                 source = "BonaRes"
             else:
                 source = "OpenAgrar"
+            ner_tags = []
+            for label in labels:
+                try:
+                    ner_tags.append(label_to_index[label])
+                except KeyError:
+                    ner_tags.append(0)
             # Append row to DataFrame
             df = pd.concat([df, pd.DataFrame([{
                 "file_name": file_name,
                 "Tokens": tokens,
+                "ner_tags": ner_tags,
                 "Labels": labels,
                 "number_of_tokens": len(tokens),
                 "Language": safe_detect(str(text)),                 # or any other source if you have
@@ -95,6 +110,7 @@ def generate_csv_from_cas_curation_files(df, cas_path, city_list_path, region_li
                 "sentence_id": pd.StringDtype(),
                 "file_name": pd.StringDtype(),
                 "Tokens": object,                  # list of strings
+                "ner_tags": object                  #list of integers
                 "Labels": object,                  # list of strings
                 "number_of_tokens": int,
                 "Language": pd.StringDtype(),
@@ -133,10 +149,17 @@ def generate_csv_from_cas_curation_files(df, cas_path, city_list_path, region_li
                 source = "BonaRes"
             else:
                 source = "OpenAgrar"
+            ner_tags = []
+            for label in labels:
+                try:
+                    ner_tags.append(label_to_index[label])
+                except KeyError:
+                    ner_tags.append(0)
             # Append row to DataFrame
             df = pd.concat([df, pd.DataFrame([{
                 "file_name": file_name,
                 "Tokens": tokens,
+                "ner_tags": ner_tags,
                 "Labels": labels,
                 "number_of_tokens": len(tokens),
                 "Language": safe_detect(str(text)),                 # or any other source if you have

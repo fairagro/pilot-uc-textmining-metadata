@@ -58,6 +58,7 @@ if __name__ == "__main__":
     columns = {
         "file_name": pd.StringDtype(),
         "Tokens": object,            # list of strings
+        "ner_tags": object,
         "Labels": object,            # list of strings
         "number_of_tokens": int,
         "Language": pd.StringDtype(),

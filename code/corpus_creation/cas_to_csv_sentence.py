@@ -12,7 +12,12 @@ import zipfile
 from cas_to_tokens import cas_sentence_to_bio, convert_location_labels
 from cas_folders_processing import process_inception_folder, process_parent_folder_curation
 nlp = spacy.load("en_core_web_sm")
-
+label_list = ["O","B-soilReferenceGroup","I-soilReferenceGroup", "B-soilOrganicCarbon", "I-soilOrganicCarbon", "B-soilTexture", "I-soilTexture",
+               "B-startTime", "I-startTime", "B-endTime", "I-endTime", "B-city", "I-city", "B-duration", "I-duration", "B-cropSpecies", "I-cropSpecies",
+                 "B-soilAvailableNitrogen", "I-soilAvailableNitrogen", "B-soilDepth", "I-soilDepth", "B-region", "I-region", "B-country", "I-country",
+                   "B-longitude", "I-longitude", "B-latitude", "I-latitude", "B-cropVariety", "I-cropVariety", "B-soilPH", "I-soilPH",
+                     "B-soilBulkDensity", "I-soilBulkDensity", 'B-Timestatement', 'I-Timestatement']
+label_to_index = {label: idx for idx, label in enumerate(label_list)}
 def safe_detect(text):
     try:
         if not text or text.strip() == "":
@@ -31,6 +36,7 @@ def generate_csv_from_cas(df, cas_path, target_zip, city_list_path, region_list_
                 "sentence_id": pd.StringDtype(),
                 "file_name": pd.StringDtype(),
                 "Tokens": object,                  # list of strings
+                "ner_tags": object                  #list of integers
                 "Labels": object,                  # list of strings
                 "number_of_tokens": int,
                 "Language": pd.StringDtype(),
@@ -73,10 +79,18 @@ def generate_csv_from_cas(df, cas_path, target_zip, city_list_path, region_list_
                     source = "BonaRes"
                 else:
                     source = "OpenAgrar"
+                
+                ner_tags = []
+                for label in labels:
+                    try:
+                        ner_tags.append(label_to_index[label])
+                    except KeyError:
+                        ner_tags.append(0) 
                 # Append row to DataFrame
                 df = pd.concat([df, pd.DataFrame([{
                     "file_name": file_name,
                     "Tokens": tokens,
+                    "ner_tags": ner_tags,
                     "Labels": labels,
                     "number_of_tokens": len(tokens),
                     "Language": safe_detect(str(sentence_text)),                 # or any other source if you have
@@ -99,6 +113,7 @@ def generate_csv_from_cas_curation(df, cas_path, city_list_path, region_list_pat
                 "sentence_id": pd.StringDtype(),
                 "file_name": pd.StringDtype(),
                 "Tokens": object,                  # list of strings
+                "ner_tags": object                  #list of integers
                 "Labels": object,                  # list of strings
                 "number_of_tokens": int,
                 "Language": pd.StringDtype(),
@@ -130,6 +145,7 @@ def generate_csv_from_cas_curation(df, cas_path, city_list_path, region_list_pat
                 sentence_text = text[sentence.begin:sentence.end]
                 
                 tokens, labels = cas_sentence_to_bio(cas, sentence)
+                original = labels
                 labels = convert_location_labels(tokens, labels, city_list_path, region_list_path, country_list_path)
                 # Filter labels to exclude "O" and labels starting with "I-"
                 filtered_labels = [lbl[2:] for lbl in labels if lbl != "O" and not lbl.startswith("I-")]
@@ -141,9 +157,16 @@ def generate_csv_from_cas_curation(df, cas_path, city_list_path, region_list_pat
                 else:
                     source = "OpenAgrar"
                 # Append row to DataFrame
+                ner_tags = []
+                for label in labels:
+                    try:
+                        ner_tags.append(label_to_index[label])
+                    except KeyError:
+                        ner_tags.append(0)
                 df = pd.concat([df, pd.DataFrame([{
                     "file_name": file_name,
                     "Tokens": tokens,
+                    "ner_tags": ner_tags,
                     "Labels": labels,
                     "number_of_tokens": len(tokens),
                     "Language": safe_detect(str(sentence_text)),                 # or any other source if you have
