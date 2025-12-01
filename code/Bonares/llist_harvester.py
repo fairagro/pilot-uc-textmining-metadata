@@ -20,10 +20,10 @@ def oai_datacite_list(url = ''):
 
 
     # Convert to JSON for readability or further processing
-    print(f'Keys of the json reponse are')
+    #print(f'Keys of the json reponse are')
     dataset = requests.get(xml_urls[1])
     dataset = xmltodict.parse(dataset.text)
-    print(print_dict_tree(dataset))
+    #print(print_dict_tree(dataset))
     output_list = []
 
     # make requests for each dataset and save it

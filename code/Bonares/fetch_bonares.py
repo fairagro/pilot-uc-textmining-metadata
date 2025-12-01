@@ -26,7 +26,6 @@ if __name__ == '__main__':
     for i, doc in enumerate(res.json()["response"]["docs"]):
         bonares_id = doc["id"]
         print(f"Harvesting dataset {i}")
-        print(doc["type"])
         ro_crate = harvest_bonares_resource_to_rocrate_json(bonares_id)
         ro_crates.append(ro_crate)
 

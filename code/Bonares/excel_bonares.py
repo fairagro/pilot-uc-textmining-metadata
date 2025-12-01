@@ -1,6 +1,7 @@
 import json
 import os
 import pandas as pd
+from tqdm import tqdm
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # import file in the dataset place
@@ -13,7 +14,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(columns=["ID", "title", "abstract_text","keywords", "publication_year","institute",
                                "language", "location"])
 
-    for element in bonares:
+    for element in tqdm(bonares):
         # Initialize variables to None
         abstract_text = None
         key_words = None

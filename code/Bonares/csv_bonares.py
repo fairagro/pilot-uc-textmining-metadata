@@ -11,7 +11,7 @@ if response.status_code == 200:
 
     records = data.get("response", {}).get("docs", [])
 
-    csv_file_name = "/Users/husain/pilot-uc-textmining-metadata/data/Bonares/output/output_new.csv"
+    csv_file_name = "/home/abdelmalak/Documents/FAIRagro/output_new.csv"
 
     headers = [
         "ID", "title", "abstract_text",
