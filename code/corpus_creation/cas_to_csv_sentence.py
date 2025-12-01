@@ -9,14 +9,16 @@ from collections import Counter
 from cassis import *
 import spacy
 import zipfile
-from cas_to_tokens import cas_sentence_to_bio, convert_location_labels
+from cas_to_tokens import cas_sentence_to_bio, convert_location_labels, remove_labels
 from cas_folders_processing import process_inception_folder, process_parent_folder_curation
 nlp = spacy.load("en_core_web_sm")
 label_list = ["O","B-soilReferenceGroup","I-soilReferenceGroup", "B-soilOrganicCarbon", "I-soilOrganicCarbon", "B-soilTexture", "I-soilTexture",
                "B-startTime", "I-startTime", "B-endTime", "I-endTime", "B-city", "I-city", "B-duration", "I-duration", "B-cropSpecies", "I-cropSpecies",
-                 "B-soilAvailableNitrogen", "I-soilAvailableNitrogen", "B-soilDepth", "I-soilDepth", "B-region", "I-region", "B-country", "I-country",
-                   "B-longitude", "I-longitude", "B-latitude", "I-latitude", "B-cropVariety", "I-cropVariety", "B-soilPH", "I-soilPH",
+                 "B-soilAvailableNitrogen", "I-soilAvailableNitrogen", "B-region", "I-region", "B-country", "I-country",
+                   "B-longitude", "I-longitude", "B-latitude", "I-latitude", "B-cropVariety", "I-cropVariety",
                      "B-soilBulkDensity", "I-soilBulkDensity", 'B-Timestatement', 'I-Timestatement']
+#labels_to_remove = ["B-soilDepth", "I-soilDepth", "B-soilPH", "I-soilPH"]
+labels_to_remove = []
 label_to_index = {label: idx for idx, label in enumerate(label_list)}
 def safe_detect(text):
     try:
@@ -69,6 +71,7 @@ def generate_csv_from_cas(df, cas_path, target_zip, city_list_path, region_list_
                 
                 tokens, labels = cas_sentence_to_bio(cas, sentence)
                 labels = convert_location_labels(tokens, labels, city_list_path, region_list_path, country_list_path)
+                labels = remove_labels(labels, labels_to_remove)
                 # Filter labels to exclude "O" and labels starting with "I-"
                 filtered_labels = [lbl[2:] for lbl in labels if lbl != "O" and not lbl.startswith("I-")]
                 
@@ -145,8 +148,8 @@ def generate_csv_from_cas_curation(df, cas_path, city_list_path, region_list_pat
                 sentence_text = text[sentence.begin:sentence.end]
                 
                 tokens, labels = cas_sentence_to_bio(cas, sentence)
-                original = labels
                 labels = convert_location_labels(tokens, labels, city_list_path, region_list_path, country_list_path)
+                labels = remove_labels(labels, labels_to_remove)
                 # Filter labels to exclude "O" and labels starting with "I-"
                 filtered_labels = [lbl[2:] for lbl in labels if lbl != "O" and not lbl.startswith("I-")]
                 # Count filtered labels

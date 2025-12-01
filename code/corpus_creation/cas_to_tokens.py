@@ -197,3 +197,105 @@ def convert_location_labels(tokens, labels, city_list_path, region_list_path, co
         else:
             i += 1
     return labels
+
+def remove_labels(labels: list, remove_labels: list):
+    """
+    This function takes a list of labels and removes some defined labels from it
+    Parameters:
+    - labels: The list of labels to be modified
+    - remove_labels: A list of labels that should be removed from the list
+    Returns:
+    - A new list with the specified labels removed
+    """
+    return [label if label not in remove_labels else "O" for label in labels]
+
+def cas_to_hf_entities(
+    cas,
+    annotation_types = [
+        "webanno.custom.Crops",
+        "webanno.custom.Location",
+        "webanno.custom.Soil",
+        "webanno.custom.Timestatement",
+    ],
+):
+    """
+    Convert a CAS document into:
+      - the raw text (cas.sofa_string)
+      - a list of entities in HuggingFace NER 'simple' aggregation format
+
+    Each entity is a dict:
+        {
+            "entity_group": <label>,
+            "word": <surface form>,
+            "start": <char_start>,
+            "end": <char_end>
+        }
+
+    Parameters
+    ----------
+    cas : CAS
+        The CAS object representing the document.
+    annotation_types : list of str
+        Fully-qualified UIMA type names for the annotations to convert.
+
+    Returns
+    -------
+    text : str
+        The full document text.
+    entities : list of dict
+        List of entity dicts in HF format.
+    """
+    text = cas.sofa_string
+    entities = []
+
+    for type_name in annotation_types:
+        for ann in cas.select(type_name):
+            begin = ann.begin
+            end = ann.end
+
+            # Determine the label, same logic as in cas_to_bio
+            label = None
+            for feat in ann.type.all_features:
+                if feat.name in ("sofa", "begin", "end"):
+                    continue
+                if hasattr(ann, feat.name):
+                    val = getattr(ann, feat.name)
+                    if val:
+                        label = val
+                        break
+
+            # Fallback to type name if no feature value is set
+            if not label:
+                label = type_name.split(".")[-1]
+
+            surface = text[begin:end]
+
+            entities.append({
+                "entity_group": label,
+                "word": surface,
+                "start": begin,
+                "end": end
+            })
+
+    # Sort by character position to keep entities in text order
+    entities.sort(key=lambda e: (e["start"], e["end"]))
+
+    return text, entities
+
+
+def cas_to_hf_entities_json(
+    cas,
+    annotation_types = [
+        "webanno.custom.Crops",
+        "webanno.custom.Location",
+        "webanno.custom.Soil",
+        "webanno.custom.Timestatement",
+    ],
+):
+    """
+    Convenience wrapper: same as cas_to_hf_entities,
+    but returns the entities as a JSON string.
+    """
+    text, entities = cas_to_hf_entities(cas, annotation_types)
+    entities_json = json.dumps(entities, ensure_ascii=False)
+    return text, entities_json
