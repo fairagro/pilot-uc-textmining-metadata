@@ -13,9 +13,9 @@ COPY processing.py url_manipulation.py llist_harvester.py fetch_openagrar.py fil
 
 # Install dependencies
 RUN pip install -r requirements.txt
-RUN mkdir /output
+RUN mkdir /dataset_files
 # Set environment variables
-ENV OPENAGRAR_URL="https://www.openagrar.de/servlets/OAIDataProvider?verb=ListRecords&metadataPrefix=oai_datacite&set=open_access"
+ENV OPENAGRAR_URL="https://www.openagrar.de/servlets/OAIDataProvider?verb=ListRecords&metadataPrefix=oai_datacite&set=GENRE:research_data"
 ENV DATAJSONFILE="/output/output.json"
 ENV DATACSVFILE="/output/output.csv"
 ENV PYTHONUNBUFFERED=1

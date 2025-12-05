@@ -27,7 +27,7 @@ def extract_keywords(data):
 
 if __name__ == '__main__':
         # Open the file in write mode and use json.dump to write the list to the file
-    with open("/Users/husain/pilot-uc-textmining-metadata/data/Bonares/output/output.json", "r") as file:
+    with open("/Users/husain/pilot-uc-textmining-metadata/data/Bonares/dataset_files/dataset_files.json", "r") as file:
         bonares = json.load(file)
     print(f'the data was found and loaded!')
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         
         if id is not None:
             if abstract_text is not None or descriptive_keywords is not None or title is not None:
-                filename = f"/Users/husain/pilot-uc-textmining-metadata/data/Bonares/output/text_files/{id}.txt"
+                filename = f"/Users/husain/pilot-uc-textmining-metadata/data/Bonares/dataset_files/text_files/{id}.txt"
 
                 # cleaned_keywords = None
                 # if keywords is not None:

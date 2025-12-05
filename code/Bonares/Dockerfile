@@ -9,7 +9,7 @@ FROM python:3.10-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-RUN mkdir /output
+RUN mkdir /dataset_files
 
 # Copy scripts and requirements
 COPY processing.py url_manipulation.py llist_harvester.py fetch_bonares.py excel_bonares.py .

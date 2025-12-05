@@ -79,7 +79,7 @@ def csv_to_textfiles(csv_file_directory, text_files_directory):
     :return:
     '''
     openagrar = pd.read_csv(csv_file_directory, sep="|")
-    # Ensure the output directory exists
+    # Ensure the dataset_files directory exists
     os.makedirs(text_files_directory, exist_ok=True)
     soil_crop_list = keywords_from_agrovoc()
     # Iterate over each row in the DataFrame

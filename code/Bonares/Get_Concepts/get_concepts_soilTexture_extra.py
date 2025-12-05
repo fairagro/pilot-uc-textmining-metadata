@@ -29,7 +29,7 @@ def load_json(filepath):
 def main():
     parser = argparse.ArgumentParser(description="Compare or process two JSON files.")
     parser.add_argument(
-        "--json1", type=str, default="/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/soilTexture_list.json",
+        "--json1", type=str, default="/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/dataset_files/ConceptsList/soilTexture_list.json",
         help="Path to the first JSON file (default: default1.json)"
     )
     parser.add_argument(

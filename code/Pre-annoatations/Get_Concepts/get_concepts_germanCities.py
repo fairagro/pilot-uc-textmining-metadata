@@ -26,7 +26,7 @@ with open("/home/abdelmalak/Documents/DE.txt", "r", encoding="utf-8") as file:
 # Convert to list if needed
 german_city_names = list(german_city_names)
 
-# filename = "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/de_cities_list.json"
+# filename = "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/dataset_files/ConceptsList/de_cities_list.json"
 # with open(filename, "w", encoding="utf-8") as f:
 #         json.dump(german_city_names, f, ensure_ascii=False, indent=4)
 

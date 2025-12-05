@@ -10,6 +10,7 @@ from collections import Counter
 import re
 from gliner import GLiNER
 from extra_rules import make_soil_patterns, make_soil_referencegroup
+import argparse
 model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1")
 
 
@@ -20,13 +21,13 @@ def load_concept_list(filename):
 def initialize_nlp_with_entity_ruler():
     model_name = "en_core_web_sm"
     
-    species_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/species_list_modified.json"
-    soilTexture_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/soilTexture_list.json"
-    bulkDensity_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/bulkDensity_list.json"
-    organicCarbon_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/organicCarbon_list.json"
-    soilReferenceGroup_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/soilReferenceGroup.json"
-    germanCities_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/de_cities_list.json"
-    varieties_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/varieties_list.json"
+    species_file = r"/ConceptsList/species_list_modified.json"
+    soilTexture_file = r"/ConceptsList/soilTexture_list.json"
+    bulkDensity_file = r"/ConceptsList/bulkDensity_list.json"
+    organicCarbon_file = r"/ConceptsList/organicCarbon_list.json"
+    soilReferenceGroup_file = r"/ConceptsList/soilReferenceGroup.json"
+    germanCities_file = r"/ConceptsList/de_cities_list.json"
+    varieties_file = r"/ConceptsList/varieties_list.json"
     nlp = spacy.load(model_name)
     # nlp.disable_pipes("ner")
 
@@ -249,7 +250,7 @@ def initialize_nlp_with_entity_ruler():
     return nlp, matcher
 
 def annotate_text_inception(input_file_path, output_file_path, nlp, matcher):
-    germanCities_file = r"/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/data/Bonares/output/ConceptsList/de_cities_list.json"
+    germanCities_file = r"/ConceptsList/de_cities_list.json"
     germanCities_list = load_concept_list(germanCities_file)
     try:
         with open(input_file_path, "r", encoding="utf-8") as file:
@@ -635,10 +636,25 @@ def process_directory_inception(input_directory, output_directory, nlp, matcher)
             entity_present = annotate_text_inception(input_file_path, output_file_path, nlp, matcher)
 
 if __name__ == "__main__":
-    nlp, matcher = initialize_nlp_with_entity_ruler()
-    input_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/OpenAgrar/datasets"
-    output_directory = r"/home/abdelmalak/Documents/FAIRagro/Inceptiondata/OpenAgrar/datasets_annotations"
+    parser = argparse.ArgumentParser(description="Process text files in INCEpTION format and generate annotations.")
+    parser.add_argument(
+        "--input_dir",
+        type=str,
+        required=True,
+        help="Path to the directory containing input text files."
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        required=True,
+        help="Directory where the annotated files will be saved."
+    )
 
-    print(f"Processing text files in Inception format from: {input_directory}")
-    process_directory_inception(input_directory, output_directory, nlp, matcher)
+    args = parser.parse_args()
+
+    # Initialize NLP + entity matcher
+    nlp, matcher = initialize_nlp_with_entity_ruler()
+
+    print(f"Processing text files in INCEpTION format from: {args.input_dir}")
+    process_directory_inception(args.input_dir, args.output_dir, nlp, matcher)
     print("✅ Inception annotation process completed.")

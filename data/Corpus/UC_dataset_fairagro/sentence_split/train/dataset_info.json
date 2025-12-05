@@ -1,0 +1,97 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "csv",
+  "dataset_size": 1935625,
+  "description": "",
+  "download_checksums": {
+    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/train_sentence_corpus.csv": {
+      "num_bytes": 1652280,
+      "checksum": null
+    },
+    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/test_sentence_corpus.csv": {
+      "num_bytes": 186614,
+      "checksum": null
+    }
+  },
+  "download_size": 1838894,
+  "features": {
+    "file_name": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Tokens": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "ner_tags": {
+      "feature": {
+        "dtype": "int64",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "Labels": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "number_of_tokens": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "Language": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "source": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Label_counts": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "number_of_annotations": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "sentence_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "doi": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 3774519,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 1738990,
+      "num_examples": 2722,
+      "dataset_name": "csv"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 196635,
+      "num_examples": 319,
+      "dataset_name": "csv"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

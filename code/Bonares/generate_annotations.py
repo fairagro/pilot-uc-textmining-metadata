@@ -45,6 +45,6 @@ def process_directory(input_directory, output_directory):
             print(f"Annotated {filename} and saved to {output_directory}")
 
 # Example usage
-input_directory = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/output/TextFiles_filtered_df_soil_crop_year"  # Replace with your actual input directory path
-output_directory = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/output/TextFiles_filtered_df_soil_crop_year_annotated"  # Directory to save annotated files
+input_directory = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/dataset_files/TextFiles_filtered_df_soil_crop_year"  # Replace with your actual input directory path
+output_directory = "/home/s27mhusa_hpc/pilot-uc-textmining-metadata/data/Bonares/dataset_files/TextFiles_filtered_df_soil_crop_year_annotated"  # Directory to save annotated files
 process_directory(input_directory, output_directory)
