@@ -105,7 +105,7 @@ The [data](data) is a directory where a copy of the corpus can be accessed. It i
 ```bash
 @dataset{abdelmalak_fairagro_ner_2025,
   author       = {Abdelmalak, Abanoub and Schneider, Gabriel and Riegler, Heike and Meier, Kristin and Specka, Xenia and Svoboda, Nikolai and Husain, Murtuza and Fluck, Juliane},
-  title        = {{FAIRagro NER Dataset: Increasing FAIRness of FAIRagro Data Through AI-Supported Metadata Enrichment}},
+  title        = {{A Manually Annotated Agricultural Dataset for AI-Based NER and FAIR Metadata Enrichment}},
   year         = {2025},
   publisher    = {Fachrepositorium Lebenswissenschaften (FRL)},
   doi          = {10.4126/FRL01-6526458},
