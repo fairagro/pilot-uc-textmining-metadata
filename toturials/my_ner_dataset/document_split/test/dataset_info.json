@@ -1,0 +1,80 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "csv",
+  "dataset_size": 1581303,
+  "description": "",
+  "download_checksums": {
+    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/train_files_corpus.csv": {
+      "num_bytes": 1415948,
+      "checksum": null
+    },
+    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/test_files_corpus.csv": {
+      "num_bytes": 157555,
+      "checksum": null
+    }
+  },
+  "download_size": 1573503,
+  "features": {
+    "file_name": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Tokens": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "ner_tags": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Labels": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "number_of_tokens": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "Language": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "source": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "Label_counts": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "number_of_annotations": {
+      "dtype": "int64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 3154806,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 1423158,
+      "num_examples": 318,
+      "dataset_name": "csv"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 158145,
+      "num_examples": 31,
+      "dataset_name": "csv"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

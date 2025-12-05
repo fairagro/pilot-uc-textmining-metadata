@@ -1,0 +1,24 @@
+{
+  "_data_files": [
+    {
+      "filename": "data-00000-of-00001.arrow"
+    }
+  ],
+  "_fingerprint": "f145e188b453ec9e",
+  "_format_columns": [
+    "file_name",
+    "Tokens",
+    "ner_tags",
+    "Labels",
+    "number_of_tokens",
+    "Language",
+    "source",
+    "Label_counts",
+    "number_of_annotations",
+    "sentence_id"
+  ],
+  "_format_kwargs": {},
+  "_format_type": null,
+  "_output_all_columns": false,
+  "_split": "train"
+}
