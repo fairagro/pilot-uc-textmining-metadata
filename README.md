@@ -15,7 +15,7 @@
 
 </p>
 
-Funded by the [FAIRagro](https://fairagro.net/en/) consortium, the pilot use case  
+Supported by the [FAIRagro](https://fairagro.net/en/) consortium, the pilot use case  
 **“Increasing FAIRness of FAIRagro data through AI-supported metadata enrichment”**  
 develops a manually annotated agricultural text corpus to support the training and 
 evaluation of **Named Entity Recognition (NER)** models.
@@ -113,3 +113,13 @@ The [data](data) is a directory where a copy of the corpus can be accessed. It i
   note         = {Version 1.0}
 }
 ```
+
+## Licensing
+
+The FAIRagro Metadata Enrichment NER Dataset is released under the:
+
+Creative Commons Attribution 4.0 International (CC BY 4.0) License
+
+License URL:
+
+https://creativecommons.org/licenses/by/4.0/
