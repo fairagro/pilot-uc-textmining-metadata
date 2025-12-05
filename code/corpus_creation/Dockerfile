@@ -10,7 +10,7 @@ WORKDIR /app
 COPY requirements.txt . 
 # Install dependencies
 RUN pip install -r requirements.txt 
-RUN mkdir /output
+RUN mkdir /dataset_files
 RUN mkdir /data
 # Copy the location related lists
 COPY data_lists/countries_list.json data_lists/de_cities_list.json data_lists/de_regions_list.json /data/

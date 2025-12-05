@@ -96,28 +96,28 @@ if __name__ == "__main__":
         "doi": pd.StringDtype()
     }
 
-    # # Create the empty DataFrame for sentences
-    # df_sentences = pd.DataFrame({col: pd.Series(dtype=dt) for col, dt in columns.items()})
-    # # Fetch thed data from the curated project
-    # df_sentences = generate_csv_from_cas_curation(df_sentences, parent_folder, city_list_path, region_list_path, country_list_path)
-    # # Fetch the data from the annoation project
-    # df_sentences = generate_csv_from_cas(df_sentences, parent_folder_leo, "GolzL.zip", city_list_path, region_list_path, country_list_path)
-    # #add the doi information
-    # df_sentences["doi"] = df_sentences.apply(
-    #     lambda row: map_doi(row, bonares_dict, openagrar_dict),
-    #     axis=1,
-    # )
+    # Create the empty DataFrame for sentences
+    df_sentences = pd.DataFrame({col: pd.Series(dtype=dt) for col, dt in columns.items()})
+    # Fetch thed data from the curated project
+    df_sentences = generate_csv_from_cas_curation(df_sentences, parent_folder, city_list_path, region_list_path, country_list_path)
+    # Fetch the data from the annoation project
+    df_sentences = generate_csv_from_cas(df_sentences, parent_folder_leo, "GolzL.zip", city_list_path, region_list_path, country_list_path)
+    #add the doi information
+    df_sentences["doi"] = df_sentences.apply(
+        lambda row: map_doi(row, bonares_dict, openagrar_dict),
+        axis=1,
+    )
     # # create the empty dataframe for file datasets
-    # df_files = pd.DataFrame({col: pd.Series(dtype=dt) for col, dt in columns.items()})
-    # # Fetch thed data from the curated project
-    # df_files = generate_csv_from_cas_curation_files(df_files, parent_folder, city_list_path, region_list_path, country_list_path)
-    # # Fetch the data from the annoation project
-    # df_files = generate_csv_from_cas_files(df_files, parent_folder_leo, "GolzL.zip", city_list_path, region_list_path, country_list_path)
-    # # add the doi information
-    # df_files["doi"] = df_files.apply(
-    #     lambda row: map_doi(row, bonares_dict, openagrar_dict),
-    #     axis=1,
-    # )
+    df_files = pd.DataFrame({col: pd.Series(dtype=dt) for col, dt in columns.items()})
+    # Fetch thed data from the curated project
+    df_files = generate_csv_from_cas_curation_files(df_files, parent_folder, city_list_path, region_list_path, country_list_path)
+    # Fetch the data from the annoation project
+    df_files = generate_csv_from_cas_files(df_files, parent_folder_leo, "GolzL.zip", city_list_path, region_list_path, country_list_path)
+    # add the doi information
+    df_files["doi"] = df_files.apply(
+        lambda row: map_doi(row, bonares_dict, openagrar_dict),
+        axis=1,
+    )
     # Split data into test and training datasets
     # create the empty dataframe for file datasets
     df_files_json = pd.DataFrame({col: pd.Series(dtype=dt) for col, dt in columns_json_format.items()})
@@ -163,20 +163,20 @@ if __name__ == "__main__":
                 '9b296f99-f6a0-423c-9716-6a04fd2e502f.txt', 
                 '95868.txt']  
     # split the data into train and test datasets
-    # test_df = df_sentences[df_sentences["file_name"].isin(test_set)]
-    # train_df = df_sentences[~df_sentences["file_name"].isin(test_set)]
-    # test_df_files = df_files[df_files["file_name"].isin(test_set)]
-    # train_df_files = df_files[~df_files["file_name"].isin(test_set)]
+    test_df = df_sentences[df_sentences["file_name"].isin(test_set)]
+    train_df = df_sentences[~df_sentences["file_name"].isin(test_set)]
+    test_df_files = df_files[df_files["file_name"].isin(test_set)]
+    train_df_files = df_files[~df_files["file_name"].isin(test_set)]
     test_df_files_json = df_files_json[df_files_json["file_name"].isin(test_set)]
     train_df_files_json = df_files_json[~df_files_json["file_name"].isin(test_set)]
     # save the csv files accordingly
-    # train_df.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/train_sentence_corpus.csv", index=False)
-    # test_df.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/test_sentence_corpus.csv", index=False)
-    #
-    # # save the csv files accordingly
-    # train_df_files.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/train_files_corpus.csv", index=False)
-    # test_df_files.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/test_files_corpus.csv", index=False)
+    train_df.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/train_sentence_corpus.csv", index=False)
+    test_df.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/test_sentence_corpus.csv", index=False)
 
     # save the csv files accordingly
-    test_df_files_json.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/train_files_json_corpus.csv", index=False)
-    train_df_files_json.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/output/test_files_json_corpus.csv", index=False)
+    train_df_files.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/train_files_corpus.csv", index=False)
+    test_df_files.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/test_files_corpus.csv", index=False)
+
+    # save the csv files accordingly
+    test_df_files_json.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/train_files_json_corpus.csv", index=False)
+    train_df_files_json.to_csv("/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/test_files_json_corpus.csv", index=False)

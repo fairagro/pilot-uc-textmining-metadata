@@ -8,7 +8,7 @@ Make sure you have Docker installed. For installation instructions, visit [Docke
 ### Build the Docker Image
 ```bash
 docker build -t create_corpus_from_inception .
-docker run   -v "$(pwd)":/output   -v /home/abdelmalak/Documents/FAIRagro/webanno17101708295286074066export_curated_documents/curation:/data/curation   -v /home/abdelmalak/Documents/FAIRagro/admin-58560539323484181674/annotation:/data/annotation   -v /home/abdelmalak/Documents/FAIRagro:/data/lists   create_corpus_from_inception
+docker run   -v "$(pwd)":/dataset_files   -v /home/abdelmalak/Documents/FAIRagro/webanno17101708295286074066export_curated_documents/curation:/data/curation   -v /home/abdelmalak/Documents/FAIRagro/admin-58560539323484181674/annotation:/data/annotation   -v /home/abdelmalak/Documents/FAIRagro:/data/lists   create_corpus_from_inception
 ```
 Feel free to replace the `$(pwd)` with the directory where you want to save the data
 

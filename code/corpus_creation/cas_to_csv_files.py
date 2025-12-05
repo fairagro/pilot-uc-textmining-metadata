@@ -17,8 +17,9 @@ nlp = spacy.load("en_core_web_sm")
 
 label_list = ["O","B-soilReferenceGroup","I-soilReferenceGroup", "B-soilOrganicCarbon", "I-soilOrganicCarbon", "B-soilTexture", "I-soilTexture",
                "B-startTime", "I-startTime", "B-endTime", "I-endTime", "B-city", "I-city", "B-duration", "I-duration", "B-cropSpecies", "I-cropSpecies",
-                 "B-soilAvailableNitrogen", "I-soilAvailableNitrogen", "B-region", "I-region", "B-country", "I-country",
-                   "B-longitude", "I-longitude", "B-latitude", "I-latitude", "B-cropVariety", "I-cropVariety", "B-soilBulkDensity", "I-soilBulkDensity"]
+                 "B-soilAvailableNitrogen", "I-soilAvailableNitrogen", "B-soilDepth", "I-soilDepth", "B-region", "I-region", "B-country", "I-country",
+                   "B-longitude", "I-longitude", "B-latitude", "I-latitude", "B-cropVariety", "I-cropVariety", "B-soilPH", "I-soilPH",
+                     "B-soilBulkDensity", "I-soilBulkDensity"]
 #labels_to_remove = ["B-soilDepth", "I-soilDepth", "B-soilPH", "I-soilPH"]
 labels_to_remove = []
 label_to_index = {label: idx for idx, label in enumerate(label_list)}
