@@ -49,6 +49,7 @@ The repository is organized as follows:
 ├── code
 │   ├──OpenAgrar
 │   ├──corpus_creation
+│   ├──pre_annotations
 │   ├──generate_annotations
 │   └──Bonares
 ├── data
@@ -61,6 +62,28 @@ The repository is organized as follows:
 ├── requirements.txt
 └── README.md
 
+```
+## How to use the software
+Each sub-directory in the [code](https://github.com/fairagro/pilot-uc-textmining-metadata/tree/main/code) dicrectory contains the code base for the componenst it is named after. The ones named after the resources are the codes used to get the datasets from each source. The pre_annotations directory is where the code to convert the text data from the sources into the data to be used in INCEpTION software. Finally the corpus_creation includes the code used to generate the final annotated corpus. In order to use each component, please refere to the instructions inside this component.
+
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/fairagro/pilot-uc-textmining-metadata.git
+cd pilot-uc-textmining-metadata
+```
+### 2. Create and activate a virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+### 3. Install the dependencies
+
+Make sure you are in the project root (where requirements.txt is located), then run:
+```bash
+pip install -r requirements.txt
 ```
 
 ## Contributors
