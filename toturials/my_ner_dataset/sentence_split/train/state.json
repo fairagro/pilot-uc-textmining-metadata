@@ -4,7 +4,7 @@
       "filename": "data-00000-of-00001.arrow"
     }
   ],
-  "_fingerprint": "f145e188b453ec9e",
+  "_fingerprint": "326c97b9e1e4894a",
   "_format_columns": [
     "file_name",
     "Tokens",
@@ -15,6 +15,7 @@
     "source",
     "Label_counts",
     "number_of_annotations",
+    "doi",
     "sentence_id"
   ],
   "_format_kwargs": {},

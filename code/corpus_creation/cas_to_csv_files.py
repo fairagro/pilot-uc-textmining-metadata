@@ -167,7 +167,7 @@ def generate_csv_from_cas_curation_files(df, cas_path, city_list_path, region_li
             # Append row to DataFrame
             df = pd.concat([df, pd.DataFrame([{
                 "file_name": file_name,
-                "Text": tokens,
+                "Tokens": tokens,
                 "ner_tags": ner_tags,
                 "Labels": labels,
                 "number_of_tokens": len(tokens),

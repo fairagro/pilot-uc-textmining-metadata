@@ -3,19 +3,19 @@
   "citation": "",
   "config_name": "default",
   "dataset_name": "csv",
-  "dataset_size": 1858479,
+  "dataset_size": 1935604,
   "description": "",
   "download_checksums": {
-    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/train_sentence_corpus.csv": {
-      "num_bytes": 1591670,
+    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/train_sentence_corpus.csv": {
+      "num_bytes": 1652259,
       "checksum": null
     },
-    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/test_sentence_corpus.csv": {
-      "num_bytes": 179574,
+    "/home/abdelmalak/Documents/FAIRagro/uc_repo/repo/pilot-uc-textmining-metadata/code/corpus_creation/dataset_files/test_sentence_corpus.csv": {
+      "num_bytes": 186614,
       "checksum": null
     }
   },
-  "download_size": 1771244,
+  "download_size": 1838873,
   "features": {
     "file_name": {
       "dtype": "string",
@@ -62,6 +62,10 @@
       "dtype": "int64",
       "_type": "Value"
     },
+    "doi": {
+      "dtype": "string",
+      "_type": "Value"
+    },
     "sentence_id": {
       "dtype": "string",
       "_type": "Value"
@@ -69,17 +73,17 @@
   },
   "homepage": "",
   "license": "",
-  "size_in_bytes": 3629723,
+  "size_in_bytes": 3774477,
   "splits": {
     "train": {
       "name": "train",
-      "num_bytes": 1669877,
+      "num_bytes": 1738969,
       "num_examples": 2722,
       "dataset_name": "csv"
     },
     "test": {
       "name": "test",
-      "num_bytes": 188602,
+      "num_bytes": 196635,
       "num_examples": 319,
       "dataset_name": "csv"
     }
