@@ -58,7 +58,7 @@ The repository is organized as follows:
 │   └──Corpus
 ├── documents
 │   └──proposal.pdf
-├── Toturials
+├── Tutorials
 ├── images
 ├── requirements.txt
 └── README.md
@@ -87,7 +87,7 @@ Make sure you are in the project root (where requirements.txt is located), then 
 pip install -r requirements.txt
 ```
 ## Hands-on
-Please refer to the [toturials](toturials) for a showcase of how to use the dataset for models fine-tuning. It follows the token-classification toturial from Huggingface. 
+Please refer to the [tutorials](tutorials) for a showcase of how to use the dataset for models fine-tuning. It follows the token-classification tutorial from Huggingface. 
 
 ## Datasets station
 The [data](data) is a directory where a copy of the corpus can be accessed. It is also a helpful directory to work as an output for the different software components.
