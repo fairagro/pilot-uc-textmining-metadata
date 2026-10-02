@@ -1,9 +1,25 @@
 import os
 import json
+import argparse
 import torch
-import re
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from datasets import load_dataset
+
+from code.Experiments.evaluation import evaluate_all, extract_prediction_json
 from code.Experiments.generate_ner_prompt import generate_ner_prompts
+
+
+HF_DATASET = (
+    "IT-ZBMED/"
+    "Agriculture_NER_Dataset_for_FAIR_Metadata_Enrichment"
+)
+
+DATASET_CONFIG = "doc_split"
+
+DEFAULT_MODEL_PATH = (
+    "Code/Experiments/local_models/"
+    "Qwen2.5-32B-Instruct"
+)
 
 
 # Step 1: Load Qwen 2.5-32B Model and Tokenizer
@@ -23,35 +39,60 @@ def load_qwen_model(model_path):
 
 
 # Step 3: Perform NER with Qwen 2.5-32B
-def perform_ner_with_qwen(model, tokenizer, text, max_length=1024):
+def perform_ner_with_qwen(
+    model,
+    tokenizer,
+    text,
+    max_input_tokens=4096,
+    max_new_tokens=1512
+):
     system_prompt, user_prompt = generate_ner_prompts(text)
     prompt = f"{system_prompt}\n\n{user_prompt}"
 
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=max_length, padding=True).to("cuda")
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=1500,
-        temperature=0.7,
-        top_p=0.9,
+    inputs = tokenizer(
+        prompt,
+        return_tensors="pt",
+        truncation=True,
+        max_length=max_input_tokens,
+        padding=True
+    ).to(model.device)
+
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            temperature=0.7,
+            top_p=0.9,
+            do_sample=True,
+            pad_token_id=tokenizer.pad_token_id
+        )
+
+    generated_tokens = outputs[0][inputs.input_ids.shape[-1]:]
+
+    response = tokenizer.decode(
+        generated_tokens,
+        skip_special_tokens=True
     )
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return response
+
+    return response.strip()
 
 
 # Step 5: Process Multiple Text Files
-import os
-from datasets import load_dataset
-
-
-def process_text_files(input_dir, model, tokenizer, output_dir):
+def process_text_files(
+    test_dataset,
+    model,
+    tokenizer,
+    output_dir,
+    max_input_tokens,
+    max_new_tokens
+):
     """
-    Process texts directly from a Hugging Face dataset.
+    Process the Hugging Face TEST split.
 
     Parameters
     ----------
-    input_dir : str
-        Hugging Face dataset name, e.g.
-        "IT-ZBMED/Agriculture_NER_Dataset_for_FAIR_Metadata_Enrichment"
+    test_dataset :
+        Hugging Face test split.
     model :
         Model used by perform_ner_with_qwen().
     tokenizer :
@@ -60,60 +101,154 @@ def process_text_files(input_dir, model, tokenizer, output_dir):
         Directory where the annotated files are saved.
     """
 
-    i = 0
-
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # Load the document-level version of the dataset
-    dataset = load_dataset(
-        input_dir,
-        "doc_split"
+    os.makedirs(
+        output_dir,
+        exist_ok=True
     )
 
-    # Process both train and test splits
-    for split_name in dataset:
-        for example in dataset[split_name]:
+    print(
+        f"Processing {len(test_dataset)} "
+        "test documents..."
+    )
 
-            filename = example["file_name"]
+    for example in test_dataset:
 
-            # Reconstruct the full document from the token list
-            text = " ".join(example["Tokens"])
+        filename = example["file_name"]
 
-            output_text_path = os.path.join(
-                output_dir,
-                filename.replace(".txt", "_annotated.txt")
+        # Reconstruct the full document from the token list
+        text = " ".join(example["Tokens"])
+
+        output_text_path = os.path.join(
+            output_dir,
+            filename.replace(".txt", "_annotated.txt")
+        )
+
+        if os.path.exists(output_text_path):
+            prediction = extract_prediction_json(
+                output_text_path
             )
 
-            print(f"Processing {filename}...")
+            if prediction is not None:
+                print(
+                    f"Skipping {filename} "
+                    "(already processed)."
+                )
+                continue
 
-            ner_result = perform_ner_with_qwen(
-                model,
-                tokenizer,
-                text
+            print(
+                f"Existing result for {filename} "
+                "is invalid. Reprocessing..."
             )
 
-            with open(
-                output_text_path,
-                "w",
-                encoding="utf-8"
-            ) as file:
-                file.write(ner_result)
+        print(f"Processing {filename}...")
 
-            print(f"NER results saved to {output_text_path}")
+        ner_result = perform_ner_with_qwen(
+            model,
+            tokenizer,
+            text,
+            max_input_tokens,
+            max_new_tokens
+        )
 
-            i += 1
+        with open(
+            output_text_path,
+            "w",
+            encoding="utf-8"
+        ) as file:
+            file.write(ner_result)
 
-            if i == 10:
-                return
+        print(f"NER results saved to {output_text_path}")
 
 # Step 6: Main Execution
 if __name__ == "__main__":
-    input_dir = "IT-ZBMED/Agriculture_NER_Dataset_for_FAIR_Metadata_Enrichment"
-    output_dir = "Code/Experiments/filtered_df_soil_crop_year_LTE_test_annotated_Qwen2.5-32B-Instruct"  # Change to the desired output directory path
-    local_model_path = "Code/Experiments/local_models/Qwen2.5-32B-Instruct"
+    parser = argparse.ArgumentParser()
 
-    qwen_model, qwen_tokenizer = load_qwen_model(local_model_path)
-    process_text_files(input_dir, qwen_model, qwen_tokenizer, output_dir)
+    parser.add_argument(
+        "--dataset_name",
+        default=HF_DATASET,
+        help="Hugging Face dataset repository."
+    )
+
+    parser.add_argument(
+        "--dataset_config",
+        default=DATASET_CONFIG,
+        help="Hugging Face dataset configuration."
+    )
+
+    parser.add_argument(
+        "--output_dir",
+        default=(
+            "Code/Experiments/"
+            "filtered_df_soil_crop_year_LTE_test_annotated_Qwen2.5-32B-Instruct"
+        ),
+        help="Directory for raw Qwen outputs."
+    )
+
+    parser.add_argument(
+        "--output_dir_json",
+        default="Code/Experiments/results/zero_shot_qwen",
+        help="Directory for evaluation metrics."
+    )
+
+    parser.add_argument(
+        "--model_name",
+        default="Qwen2.5-32B-Instruct",
+        help="Human-readable model name used in evaluation results."
+    )
+
+    parser.add_argument(
+        "--model_path",
+        default=DEFAULT_MODEL_PATH,
+        help="Local Qwen model path."
+    )
+
+    parser.add_argument(
+        "--max_input_tokens",
+        type=int,
+        default=4096,
+        help="Maximum input prompt tokens."
+    )
+
+    parser.add_argument(
+        "--max_new_tokens",
+        type=int,
+        default=1512,
+        help="Maximum number of generated output tokens."
+    )
+
+    args = parser.parse_args()
+
+    dataset = load_dataset(
+        args.dataset_name,
+        args.dataset_config
+    )
+
+    test_dataset = dataset["test"]
+
+    qwen_model, qwen_tokenizer = load_qwen_model(
+        args.model_path
+    )
+
+    process_text_files(
+        test_dataset,
+        qwen_model,
+        qwen_tokenizer,
+        args.output_dir,
+        args.max_input_tokens,
+        args.max_new_tokens
+    )
+
+    log_dir = os.environ.get(
+        "LOG_DIR"
+    )
+
+    evaluate_all(
+        args.model_name,
+        test_dataset,
+        args.output_dir,
+        args.output_dir_json,
+        None,
+        log_dir
+    )
 
     print("NER processing complete.")

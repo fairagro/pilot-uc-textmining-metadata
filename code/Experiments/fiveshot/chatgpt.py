@@ -880,15 +880,6 @@ def main():
 
 
     # ========================================================
-    # Prepare local copy of TEST text for evaluator
-    # ========================================================
-
-    test_text_dir = os.path.join(
-        args.output_dir,
-        "_test_texts"
-    )
-
-    # ========================================================
     # Annotate TEST split
     # ========================================================
 
@@ -916,7 +907,7 @@ def main():
 
     evaluate_all(
         args.model_name,
-        test_text_dir,
+        test_dataset,
         args.output_dir,
         args.output_dir_json,
         args.top_k,
